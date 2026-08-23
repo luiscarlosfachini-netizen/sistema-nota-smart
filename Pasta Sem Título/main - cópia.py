@@ -8,7 +8,7 @@ app.config["SECRET_KEY"] = os.environ.get(
     "SECRET_KEY", "sua-chave-secreta-padrao"
 )
 
-# Configuração da conexão com o Supabase via variável de ambiente do Render
+# Conexão com o Supabase via variável de ambiente do Render
 database_url = os.environ.get("DATABASE_URL")
 if database_url and database_url.startswith("postgres://"):
   database_url = database_url.replace("postgres://", "postgresql://", 1)
@@ -44,41 +44,48 @@ class CobrancaModel(db.Model):
   mes = db.Column(db.String(20))
 
 
-# --- ROTAS PRINCIPAIS / DASHBOARD (CORRIGIDAS PARA RAIZ) ---
+# --- ROTAS PRINCIPAIS / DASHBOARD ---
 @app.route("/")
 @app.route("/dashboard")
 def dashboard():
   tab = request.args.get("tab", "clientes")
   mes = request.args.get("mes", datetime.now().strftime("%Y-%m"))
 
-  # Consulta de dados e conversão em dicionários para evitar erro de serialização no template
-  clientes_db = ClienteModel.query.all()
-  clientes = []
-  for c in clientes_db:
-    clientes.append({
-        "id": c.id,
-        "empresa": c.empresa,
-        "cnpj": c.cnpj,
-        "contato": c.contato,
-        "telefone": c.telefone,
-        "sistema": c.sistema,
-        "status_fmt": c.status_fmt,
-        "modulos": c.modulos,
-        "vencimento_cert": c.vencimento_cert,
-    })
+  try:
+    clientes_db = ClienteModel.query.all()
+    cobrancas_db = CobrancaModel.query.filter_by(mes=mes).all()
 
-  cobrancas_db = CobrancaModel.query.filter_by(mes=mes).all()
-  cobrancas = []
-  for cob in cobrancas_db:
-    cobrancas.append({
-        "id": cob.id,
-        "tipo_fmt": cob.tipo_fmt,
-        "nome_exibicao": cob.nome_exibicao,
-        "valor": cob.valor,
-        "data_vencimento": cob.data_vencimento,
-        "status_fmt": cob.status_fmt,
-        "mes": cob.mes,
-    })
+    # Serialização manual para dicionários (evita o erro do tojson no Jinja)
+    clientes = []
+    for c in clientes_db:
+      clientes.append({
+          "id": c.id,
+          "empresa": c.empresa,
+          "cnpj": c.cnpj,
+          "contato": c.contato,
+          "telefone": c.telefone,
+          "sistema": c.sistema,
+          "status_fmt": c.status_fmt,
+          "modulos": c.modulos,
+          "vencimento_cert": c.vencimento_cert,
+      })
+
+    cobrancas = []
+    for cob in cobrancas_db:
+      cobrancas.append({
+          "id": cob.id,
+          "tipo_fmt": cob.tipo_fmt,
+          "nome_exibicao": cob.nome_exibicao,
+          "valor": cob.valor,
+          "data_vencimento": cob.data_vencimento,
+          "status_fmt": cob.status_fmt,
+          "mes": cob.mes,
+      })
+
+  except Exception as e:
+    print(f"Erro ao consultar banco de dados: {e}")
+    clientes = []
+    cobrancas = []
 
   return render_template(
       "dashboard.html",
@@ -89,7 +96,7 @@ def dashboard():
   )
 
 
-# --- ROTAS DE EDIÇÃO / CADASTRO (BLINDADAS) ---
+# --- ROTAS DE EDIÇÃO / CADASTRO ---
 
 
 @app.route("/cliente/editar", methods=["POST"])
@@ -146,7 +153,6 @@ def financeiro_editar():
       cob.tipo_fmt = request.form.get("tipo")
       cob.nome_exibicao = request.form.get("cliente_nome")
 
-      # Tratamento seguro para conversão de valor monetário (substitui pontos e vírgulas)
       valor_raw = request.form.get("valor", "0")
       if isinstance(valor_raw, str):
         valor_raw = (
