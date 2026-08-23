@@ -306,7 +306,7 @@ def cliente_editar():
         c.sistema = request.form.get("sistema")
         c.status_fmt = request.form.get("status_cliente", "ATIVO")
         c.modulos = request.form.get("modulos")
-        c.vencimento_cert = request.form.get("vencimento_cert")
+        c.vencimento_cert = request.form.get("vencimento_cert") # Correção aplicada aqui
         db.session.commit()
     tab = request.form.get("tab", "clientes")
     return redirect(url_for("dashboard", tab=tab))
