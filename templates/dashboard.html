@@ -56,8 +56,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <!-- BOTÃO QUE PASSA O JSON CORRETO DO CLIENTE -->
-                            <button onclick='openEditModal({{ c|tojson | safe }})' class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded">Editar</button>
+                            <button onclick='openEditModal({{ c | tojson | safe }})' class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded">Editar</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -88,7 +87,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{ "%.2f"|format(cob.valor) }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cob.data_vencimento }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button onclick='openFinanceiroModal({{ cob|tojson | safe }})' class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded">Editar</button>
+                            <button onclick='openFinanceiroModal({{ cob | tojson | safe }})' class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded">Editar</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -103,7 +102,6 @@
         <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl">
             <h3 class="text-lg font-bold mb-4 text-gray-800">Editar Cliente</h3>
             <form action="{{ url_for('cliente_editar') }}" method="POST">
-                <!-- ID crucial para o Supabase mapear qual registro atualizar -->
                 <input type="hidden" id="edit_id" name="id">
                 <input type="hidden" name="tab" value="clientes">
 
@@ -163,7 +161,6 @@
     <!-- SCRIPT DE MANIPULAÇÃO DOS MODAIS -->
     <script>
         function openEditModal(cliente) {
-            // Popula o ID e os campos correspondentes de forma segura
             document.getElementById('edit_id').value = cliente.id || '';
             document.getElementById('edit_empresa').value = cliente.empresa || '';
             document.getElementById('edit_cnpj').value = cliente.cnpj || '';
@@ -173,8 +170,6 @@
             document.getElementById('edit_status').value = cliente.status_fmt || 'ATIVO';
             document.getElementById('edit_modulos').value = cliente.modulos || '';
             document.getElementById('edit_vencimento_cert').value = cliente.vencimento_cert || '';
-            
-            // Exibe o modal
             document.getElementById('modalEditarCliente').classList.remove('hidden');
         }
 

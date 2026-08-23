@@ -51,7 +51,7 @@ def dashboard():
   tab = request.args.get("tab", "clientes")
   mes = request.args.get("mes", datetime.now().strftime("%Y-%m"))
 
-  # Consulta de dados para preencher as tabelas convertidos para dicionários (evita erros no tojson do HTML)
+  # Consulta de dados convertidos para dicionários (Garante que o tojson do HTML não dê erro)
   clientes_db = ClienteModel.query.all()
   clientes = []
   for c in clientes_db:
@@ -146,7 +146,6 @@ def financeiro_editar():
       cob.tipo_fmt = request.form.get("tipo")
       cob.nome_exibicao = request.form.get("cliente_nome")
 
-      # Tratamento seguro para conversão de valor monetário (substitui pontos e vírgulas)
       valor_raw = request.form.get("valor", "0")
       if isinstance(valor_raw, str):
         valor_raw = (
