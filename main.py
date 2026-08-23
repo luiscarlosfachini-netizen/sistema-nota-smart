@@ -1,12 +1,19 @@
 from datetime import datetime
+import os
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "sua-chave-secreta-aqui"
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY", "sua-chave-secreta-aqui"
+)
 
-# Configuração da conexão com o Supabase (Substitua pela sua URL/URI do PostgreSQL do Supabase)
-# Exemplo: app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:suasenha@db.xxxx.supabase.co:5432/postgres'
+# Configuração da conexão com o Supabase via variável de ambiente do Render
+database_url = os.environ.get("DATABASE_URL")
+if database_url and database_url.startswith("postgres://"):
+  database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -39,13 +46,39 @@ class CobrancaModel(db.Model):
 
 # --- ROTA PRINCIPAL / DASHBOARD ---
 @app.route("/")
+@app.route("/dashboard")
 def dashboard():
   tab = request.args.get("tab", "clientes")
   mes = request.args.get("mes", datetime.now().strftime("%Y-%m"))
 
-  # Consulta de dados para preencher as tabelas
-  clientes = ClienteModel.query.all()
-  cobrancas = CobrancaModel.query.filter_by(mes=mes).all()
+  # Consulta de dados para preencher as tabelas convertidos para dicionários (evita erros no tojson do HTML)
+  clientes_db = ClienteModel.query.all()
+  clientes = []
+  for c in clientes_db:
+    clientes.append({
+        "id": c.id,
+        "empresa": c.empresa,
+        "cnpj": c.cnpj,
+        "contato": c.contato,
+        "telefone": c.telefone,
+        "sistema": c.sistema,
+        "status_fmt": c.status_fmt,
+        "modulos": c.modulos,
+        "vencimento_cert": c.vencimento_cert,
+    })
+
+  cobrancas_db = CobrancaModel.query.filter_by(mes=mes).all()
+  cobrancas = []
+  for cob in cobrancas_db:
+    cobrancas.append({
+        "id": cob.id,
+        "tipo_fmt": cob.tipo_fmt,
+        "nome_exibicao": cob.nome_exibicao,
+        "valor": cob.valor,
+        "data_vencimento": cob.data_vencimento,
+        "status_fmt": cob.status_fmt,
+        "mes": cob.mes,
+    })
 
   return render_template(
       "dashboard.html",
