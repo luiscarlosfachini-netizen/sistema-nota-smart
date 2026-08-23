@@ -1,12 +1,22 @@
 from datetime import datetime
+import os
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "sua-chave-secreta-aqui"
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY", "sua-chave-secreta-padrao"
+)
 
-# Configuração da conexão com o Supabase (Substitua pela sua URL/URI do PostgreSQL do Supabase)
-# Exemplo: app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:suasenha@db.xxxx.supabase.co:5432/postgres'
+# CORREÇÃO CRUCIAL PARA O RENDER: Pega a URL do banco diretamente das variáveis de ambiente do Render/Supabase
+# Certifique-se de adicionar a variável DATABASE_URL nas Environment Variables do Render se ainda não tiver.
+database_url = os.environ.get("DATABASE_URL")
+
+# Compatibilidade caso o Supabase utilize postgres:// em vez de postgresql:// no SQLAlchemy moderno
+if database_url and database_url.startswith("postgres://"):
+  database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -37,16 +47,20 @@ class CobrancaModel(db.Model):
   mes = db.Column(db.String(20))
 
 
-# --- ROTAS PRINCIPAIS / DASHBOARD (CORRIGIDAS PARA RAIZ) ---
+# --- ROTAS PRINCIPAIS / DASHBOARD ---
 @app.route("/")
 @app.route("/dashboard")
 def dashboard():
   tab = request.args.get("tab", "clientes")
   mes = request.args.get("mes", datetime.now().strftime("%Y-%m"))
 
-  # Consulta de dados para preencher as tabelas
-  clientes = ClienteModel.query.all()
-  cobrancas = CobrancaModel.query.filter_by(mes=mes).all()
+  try:
+    clientes = ClienteModel.query.all()
+    cobrancas = CobrancaModel.query.filter_by(mes=mes).all()
+  except Exception as e:
+    print(f"Erro ao consultar banco de dados: {e}")
+    clientes = []
+    cobrancas = []
 
   return render_template(
       "dashboard.html",
@@ -114,7 +128,6 @@ def financeiro_editar():
       cob.tipo_fmt = request.form.get("tipo")
       cob.nome_exibicao = request.form.get("cliente_nome")
 
-      # Tratamento seguro para conversão de valor monetário (substitui pontos e vírgulas)
       valor_raw = request.form.get("valor", "0")
       if isinstance(valor_raw, str):
         valor_raw = (
