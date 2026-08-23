@@ -47,17 +47,17 @@
                 <tbody class="divide-y divide-gray-200">
                     {% for c in clientes %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ c.empresa }}[cite: 13]</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ c.cnpj }}[cite: 13]</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ c.sistema }}[cite: 13]</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ c.empresa }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ c.cnpj }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ c.sistema }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if c.status_fmt == 'ATIVO' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                                {{ c.status_fmt }}[cite: 13]
+                                {{ c.status_fmt }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <!-- BOTÃO QUE PASSA O JSON CORRETO DO CLIENTE JÁ SERIALIZADO -->
-                            <button onclick='openEditModal({{ c | tojson | safe }})' class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded">Editar</button>[cite: 13]
+                            <!-- BOTÃO QUE PASSA O JSON CORRETO DO CLIENTE -->
+                            <button onclick='openEditModal({{ c|tojson | safe }})' class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded">Editar</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -69,7 +69,7 @@
         <!-- CONTEÚDO DA ABA FINANCEIRO -->
         {% if tab_atual == 'financeiro' %}
         <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-bold mb-4 text-gray-700">Lançamentos Financeiros (Mês: {{ mes_atual }}[cite: 13])</h2>
+            <h2 class="text-xl font-bold mb-4 text-gray-700">Lançamentos Financeiros (Mês: {{ mes_atual }})</h2>
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
@@ -83,12 +83,12 @@
                 <tbody class="divide-y divide-gray-200">
                     {% for cob in cobrancas %}
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ cob.nome_exibicao }}[cite: 13]</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cob.tipo_fmt }}[cite: 13]</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{ "%.2f"|format(cob.valor) }}[cite: 13]</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cob.data_vencimento }}[cite: 13]</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ cob.nome_exibicao }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cob.tipo_fmt }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{ "%.2f"|format(cob.valor) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cob.data_vencimento }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button onclick='openFinanceiroModal({{ cob | tojson | safe }})' class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded">Editar</button>[cite: 13]
+                            <button onclick='openFinanceiroModal({{ cob|tojson | safe }})' class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded">Editar</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -104,38 +104,38 @@
             <h3 class="text-lg font-bold mb-4 text-gray-800">Editar Cliente</h3>
             <form action="{{ url_for('cliente_editar') }}" method="POST">
                 <!-- ID crucial para o Supabase mapear qual registro atualizar -->
-                <input type="hidden" id="edit_id" name="id">[cite: 13]
-                <input type="hidden" name="tab" value="clientes">[cite: 13]
+                <input type="hidden" id="edit_id" name="id">
+                <input type="hidden" name="tab" value="clientes">
 
                 <div class="mb-3">
                     <label class="block text-sm font-medium text-gray-700">Empresa</label>
-                    <input type="text" id="edit_empresa" name="empresa" class="w-full border rounded px-3 py-2 mt-1 focus:ring-blue-500 focus:border-blue-500">[cite: 13]
+                    <input type="text" id="edit_empresa" name="empresa" class="w-full border rounded px-3 py-2 mt-1 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 
                 <div class="mb-3">
                     <label class="block text-sm font-medium text-gray-700">CNPJ</label>
-                    <input type="text" id="edit_cnpj" name="cnpj" class="w-full border rounded px-3 py-2 mt-1">[cite: 13]
+                    <input type="text" id="edit_cnpj" name="cnpj" class="w-full border rounded px-3 py-2 mt-1">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Contato</label>
-                        <input type="text" id="edit_contato" name="contato" class="w-full border rounded px-3 py-2 mt-1">[cite: 13]
+                        <input type="text" id="edit_contato" name="contato" class="w-full border rounded px-3 py-2 mt-1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Telefone</label>
-                        <input type="text" id="edit_telefone" name="telefone" class="w-full border rounded px-3 py-2 mt-1">[cite: 13]
+                        <input type="text" id="edit_telefone" name="telefone" class="w-full border rounded px-3 py-2 mt-1">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Sistema</label>
-                        <input type="text" id="edit_sistema" name="sistema" class="w-full border rounded px-3 py-2 mt-1">[cite: 13]
+                        <input type="text" id="edit_sistema" name="sistema" class="w-full border rounded px-3 py-2 mt-1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Status</label>
-                        <select id="edit_status" name="status_cliente" class="w-full border rounded px-3 py-2 mt-1">[cite: 13]
+                        <select id="edit_status" name="status_cliente" class="w-full border rounded px-3 py-2 mt-1">
                             <option value="ATIVO">ATIVO</option>
                             <option value="INATIVO">INATIVO</option>
                         </select>
@@ -144,17 +144,17 @@
 
                 <div class="mb-3">
                     <label class="block text-sm font-medium text-gray-700">Módulos</label>
-                    <input type="text" id="edit_modulos" name="modulos" class="w-full border rounded px-3 py-2 mt-1">[cite: 13]
+                    <input type="text" id="edit_modulos" name="modulos" class="w-full border rounded px-3 py-2 mt-1">
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Vencimento Certificado</label>
-                    <input type="text" id="edit_vencimento_cert" name="vencimento_cert" class="w-full border rounded px-3 py-2 mt-1">[cite: 13]
+                    <input type="text" id="edit_vencimento_cert" name="vencimento_cert" class="w-full border rounded px-3 py-2 mt-1">
                 </div>
 
                 <div class="flex justify-end gap-2 mt-4">
-                    <button type="button" onclick="closeModal('modalEditarCliente')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancelar</button>[cite: 13]
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Salvar Alterações</button>[cite: 13]
+                    <button type="button" onclick="closeModal('modalEditarCliente')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Salvar Alterações</button>
                 </div>
             </form>
         </div>
@@ -163,23 +163,23 @@
     <!-- SCRIPT DE MANIPULAÇÃO DOS MODAIS -->
     <script>
         function openEditModal(cliente) {
-            // Popula o ID e os campos correspondentes de forma segura[cite: 13]
-            document.getElementById('edit_id').value = cliente.id || '';[cite: 13]
-            document.getElementById('edit_empresa').value = cliente.empresa || '';[cite: 13]
-            document.getElementById('edit_cnpj').value = cliente.cnpj || '';[cite: 13]
-            document.getElementById('edit_contato').value = cliente.contato || '';[cite: 13]
-            document.getElementById('edit_telefone').value = cliente.telefone || '';[cite: 13]
-            document.getElementById('edit_sistema').value = cliente.sistema || '';[cite: 13]
-            document.getElementById('edit_status').value = cliente.status_fmt || 'ATIVO';[cite: 13]
-            document.getElementById('edit_modulos').value = cliente.modulos || '';[cite: 13]
-            document.getElementById('edit_vencimento_cert').value = cliente.vencimento_cert || '';[cite: 13]
+            // Popula o ID e os campos correspondentes de forma segura
+            document.getElementById('edit_id').value = cliente.id || '';
+            document.getElementById('edit_empresa').value = cliente.empresa || '';
+            document.getElementById('edit_cnpj').value = cliente.cnpj || '';
+            document.getElementById('edit_contato').value = cliente.contato || '';
+            document.getElementById('edit_telefone').value = cliente.telefone || '';
+            document.getElementById('edit_sistema').value = cliente.sistema || '';
+            document.getElementById('edit_status').value = cliente.status_fmt || 'ATIVO';
+            document.getElementById('edit_modulos').value = cliente.modulos || '';
+            document.getElementById('edit_vencimento_cert').value = cliente.vencimento_cert || '';
             
-            // Exibe o modal[cite: 13]
-            document.getElementById('modalEditarCliente').classList.remove('hidden');[cite: 13]
+            // Exibe o modal
+            document.getElementById('modalEditarCliente').classList.remove('hidden');
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');[cite: 13]
+            document.getElementById(modalId).classList.add('hidden');
         }
     </script>
 </body>
