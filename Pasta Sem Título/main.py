@@ -55,7 +55,7 @@ def dashboard():
     clientes_db = ClienteModel.query.all()
     cobrancas_db = CobrancaModel.query.filter_by(mes=mes).all()
 
-    # Serialização manual para dicionários (evita o erro do tojson no Jinja)
+    # Serialização manual para dicionários (evita erros no tojson do Jinja)
     clientes = []
     for c in clientes_db:
       clientes.append({
