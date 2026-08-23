@@ -37,8 +37,9 @@ class CobrancaModel(db.Model):
   mes = db.Column(db.String(20))
 
 
-# --- ROTA PRINCIPAL / DASHBOARD ---
+# --- ROTAS PRINCIPAIS / DASHBOARD (CORRIGIDAS PARA RAIZ) ---
 @app.route("/")
+@app.route("/dashboard")
 def dashboard():
   tab = request.args.get("tab", "clientes")
   mes = request.args.get("mes", datetime.now().strftime("%Y-%m"))
