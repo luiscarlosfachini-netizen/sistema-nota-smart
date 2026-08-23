@@ -9,7 +9,7 @@ app.secret_key = "sua_chave_secreta_aqui"
 
 # Configuração do Banco de Dados PostgreSQL no Supabase (com o '@' da senha codificado como %40)
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "postgresql://postgres:Spike%4077991340@db.bmnvxtcdmtuklmpxelwa.supabase.co:5432/postgres"
+    "postgresql://postgres:Spike%4077991340@db.bmnvxtcdmtuklmpxelwa.supabase.co:6453/postgres"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
