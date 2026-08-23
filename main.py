@@ -128,10 +128,19 @@ def dashboard():
 
     cobrancas_mes = [c for c in cobrancas_db if c.mes == mes_atual]
 
+    # Filtro para a aba de Relatórios Financeiros (considerando cliente e intervalo de datas)
     cobrancas_relatorio = cobrancas_db
     if filtro_cliente:
         cobrancas_relatorio = [
             c for c in cobrancas_relatorio if c.nome_exibicao == filtro_cliente
+        ]
+    if data_inicio:
+        cobrancas_relatorio = [
+            c for c in cobrancas_relatorio if c.data_vencimento and c.data_vencimento >= data_inicio
+        ]
+    if data_fim:
+        cobrancas_relatorio = [
+            c for c in cobrancas_relatorio if c.data_vencimento and c.data_vencimento <= data_fim
         ]
 
     total_receita = sum(
