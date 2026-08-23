@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.secret_key = "sua_chave_secreta_aqui"
 
-# Configuração do Banco de Dados PostgreSQL no Supabase (com o '@' da senha codificado como %40)
+# Configuração do Banco de Dados PostgreSQL no Supabase
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     "postgresql://postgres.bmnvxtcdmtuklmpxelwa:Spike%4077991340@aws-0-sa-east-1.pooler.supabase.com:6543/postgres"
 )
@@ -57,7 +57,6 @@ class UsuarioModel(db.Model):
 with app.app_context():
     db.create_all()
 
-    # Se a tabela de clientes estiver vazia, importa da planilha
     if ClienteModel.query.count() == 0:
         ARQUIVO_EXCEL = "Clientes NOTA SMART!.xlsx"
         if os.path.exists(ARQUIVO_EXCEL):
@@ -84,7 +83,6 @@ with app.app_context():
             except Exception as e:
                 print(f"Erro ao importar planilha: {e}")
 
-        # Cria um usuário admin padrão se não houver nenhum
         if UsuarioModel.query.count() == 0:
             admin_padrao = UsuarioModel(
                 nome="Administrador",
@@ -128,7 +126,6 @@ def dashboard():
 
     cobrancas_mes = [c for c in cobrancas_db if c.mes == mes_atual]
 
-    # Filtro para a aba de Relatórios Financeiros (considerando cliente e intervalo de datas)
     cobrancas_relatorio = cobrancas_db
     if filtro_cliente:
         cobrancas_relatorio = [
@@ -306,7 +303,7 @@ def cliente_editar():
         c.sistema = request.form.get("sistema")
         c.status_fmt = request.form.get("status_cliente", "ATIVO")
         c.modulos = request.form.get("modulos")
-        c.vencimento_cert = request.form.get("vencimento_cert") # Correção aplicada aqui
+        c.vencimento_cert = request.form.get("vencimento_cert")
         db.session.commit()
     tab = request.form.get("tab", "clientes")
     return redirect(url_for("dashboard", tab=tab))
