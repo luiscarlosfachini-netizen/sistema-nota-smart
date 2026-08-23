@@ -141,12 +141,12 @@ def dashboard():
         ]
 
     total_receita = sum(
-        float(c.valor)
+        float(c.valor or 0.0)
         for c in cobrancas_mes
         if c.tipo_fmt == "RECEITA" and c.status_fmt == "PAGO"
     )
     total_custo = sum(
-        float(c.valor)
+        float(c.valor or 0.0)
         for c in cobrancas_mes
         if c.tipo_fmt == "DESPESA" and c.status_fmt == "PAGO"
     )
@@ -303,7 +303,7 @@ def cliente_editar():
         c.sistema = request.form.get("sistema")
         c.status_fmt = request.form.get("status_cliente", "ATIVO")
         c.modulos = request.form.get("modulos")
-        c.vencimento_cert = request.form.get("vencimento_cert")  # 👈 CORREÇÃO APLICADA AQUI
+        c.vencimento_cert = request.form.get("vencimento_cert")
         db.session.commit()
     tab = request.form.get("tab", "clientes")
     return redirect(url_for("dashboard", tab=tab))

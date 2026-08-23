@@ -144,7 +144,7 @@
                     <label class="text-sm font-semibold">Mês de Referência:</label>
                     <input type="month" id="filtroMes" value="{{ mes_atual }}" onchange="filtrarMesFinanceiro(this.value)" class="p-2 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 text-sm">
                 </div>
-                <button onclick="openModal('modalNovoLancamento')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition">+ Novo Lançamento</button>
+                <button onclick="openModalNovoLancamento()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition">+ Novo Lançamento</button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -612,13 +612,6 @@
 
         window.onload = function() {
             switchTab(tabAtivaServidor || 'clientes');
-            const mesInput = document.getElementById('filtroMes');
-            if (mesInput && mesInput.value) {
-                const elNovo = document.getElementById('input_mes_novo_lanc');
-                const elEdit = document.getElementById('input_mes_edit_lanc');
-                if(elNovo) elNovo.value = mesInput.value;
-                if(elEdit) elEdit.value = mesInput.value;
-            }
         };
 
         function togglePerfilMenu() {
@@ -671,6 +664,16 @@
         }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+        // Função corrigida para injetar o mês selecionado no modal de novo lançamento no momento da abertura
+        function openModalNovoLancamento() {
+            const mesInput = document.getElementById('filtroMes');
+            const elNovo = document.getElementById('input_mes_novo_lanc');
+            if (mesInput && elNovo) {
+                elNovo.value = mesInput.value;
+            }
+            openModal('modalNovoLancamento');
+        }
+
         function openEditModal(cliente) {
             document.getElementById('edit_id').value = cliente.id || '';
             document.getElementById('edit_empresa').value = cliente.empresa || '';
@@ -680,11 +683,17 @@
             document.getElementById('edit_sistema').value = cliente.sistema || '';
             document.getElementById('edit_status').value = cliente.status_fmt || 'ATIVO';
             document.getElementById('edit_modulos').value = cliente.modulos || '';
-            document.getElementById('edit_vencimento_cert').value = cliente.vencimento_cert || cliente.vencimento || '';
+            document.getElementById('edit_vencimento_cert').value = cliente.vencimento_cert || '';
             openModal('modalEditarCliente');
         }
 
         function openEditLancamentoModal(cob) {
+            const mesInput = document.getElementById('filtroMes');
+            const elEdit = document.getElementById('input_mes_edit_lanc');
+            if (mesInput && elEdit) {
+                elEdit.value = mesInput.value;
+            }
+
             document.getElementById('edit_lanc_id').value = cob.id || '';
             document.getElementById('edit_lanc_tipo').value = cob.tipo_fmt || 'RECEITA';
             document.getElementById('edit_lanc_cliente').value = cob.nome_exibicao || '';
