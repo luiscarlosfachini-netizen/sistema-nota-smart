@@ -2,13 +2,13 @@ import os
 import calendar
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "chave_secreta_padrao_nota_smart")
 
-# Configuração do Banco de Dados SQLite (Persistente no ambiente local e no Render)
+# Configuração do Banco de Dados SQLite (Persistente no ambiente local, porém efêmero no Render Free)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "database.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -91,7 +91,9 @@ def login():
             session["usuario_id"] = usuario.id
             return redirect(url_for("dashboard"))
 
-        return render_template("login.html", erro="E-mail ou senha incorretos.")
+        # Correção: O HTML do login espera as mensagens através da função 'flash'
+        flash("E-mail ou senha incorretos.", "error")
+        return redirect(url_for("login"))
 
     return render_template("login.html")
 
