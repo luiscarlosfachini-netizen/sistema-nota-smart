@@ -7,22 +7,14 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        black: '#000000',
-                        darkcard: '#0a0a0a',
-                        darkborder: '#1f1f1f'
-                    }
-                }
-            }
+            theme: { extend: { colors: { black: '#000000', darkcard: '#0a0a0a', darkborder: '#1f1f1f' } } }
         }
     </script>
     <style>
         @media print {
             nav, .no-print, button, input, select { display: none !important; }
             .tab-content { display: block !important; }
-            body { background: white !important; color: black !important; }
+            body { background: #0a0a0a !important; color: white !important; }
             .print-area { display: block !important; }
         }
         th.sortable { cursor: pointer; user-select: none; }
@@ -32,12 +24,19 @@
 <body class="bg-slate-100 dark:bg-black text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
     <!-- Navbar -->
     <nav class="bg-white dark:bg-darkcard border-b border-slate-200 dark:border-darkborder px-6 py-3 flex justify-between items-center shadow-sm">
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-3 w-1/4">
             <img src="/static/logo.png" alt="Logo NOTA SMART" class="h-10 w-auto object-contain">
-            <span class="text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2.5 py-0.5 rounded-full font-bold">v4.1</span>
+            <span class="text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2.5 py-0.5 rounded-full font-bold">v4.2</span>
         </div>
 
-        <div class="flex items-center space-x-4 relative">
+        <div class="flex-1 flex justify-center items-center space-x-8 no-print">
+            <button onclick="switchTab('clientes')" id="tab-clientes" class="tab-btn py-2 px-1 border-b-2 font-bold text-sm">👥 Clientes</button>
+            <button onclick="switchTab('financeiro')" id="tab-financeiro" class="tab-btn py-2 px-1 border-b-2 font-bold text-sm">💰 Financeiro</button>
+            <button onclick="switchTab('certificados')" id="tab-certificados" class="tab-btn py-2 px-1 border-b-2 font-bold text-sm">🔒 Certificados</button>
+            <button onclick="switchTab('relatorios')" id="tab-relatorios" class="tab-btn py-2 px-1 border-b-2 font-bold text-sm">📊 Relatórios</button>
+        </div>
+
+        <div class="flex items-center space-x-4 relative w-1/4 justify-end">
             <div class="relative">
                 <button onclick="togglePerfilMenu()" class="flex items-center space-x-2 focus:outline-none p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-900 transition">
                     {% if usuario.foto %}
@@ -50,51 +49,31 @@
                     <span class="text-sm font-semibold hidden md:inline">{{ usuario.nome }}</span>
                     <span class="text-xs text-slate-400">▼</span>
                 </button>
-
                 <div id="perfilMenu" class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-slate-200 dark:border-zinc-800 py-2 z-50">
                     <div class="px-4 py-2 border-b border-slate-100 dark:border-zinc-800">
                         <p class="text-xs text-slate-400">Logado como</p>
                         <p class="text-sm font-bold truncate">{{ usuario.nome }}</p>
                     </div>
-
                     <button onclick="toggleTheme()" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-zinc-800 flex justify-between items-center">
-                        <span>Tema</span>
-                        <span id="themeIcon">🌙 Escuro</span>
+                        <span>Tema</span><span id="themeIcon">🌙 Escuro</span>
                     </button>
-
-                    <button onclick="openModal('modalPerfilConfig')" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-zinc-800">
-                        ⚙️ Configurar Perfil
-                    </button>
-
-                    <button onclick="openModal('modalGerenciarContas')" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-zinc-800">
-                        👥 Gerenciar Contas
-                    </button>
-
+                    <button onclick="openModal('modalPerfilConfig')" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-zinc-800">⚙️ Configurar Perfil</button>
+                    <button onclick="openModal('modalGerenciarContas')" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-zinc-800">👥 Gerenciar Contas</button>
                     <div class="border-t border-slate-100 dark:border-zinc-800 my-1"></div>
-
-                    <a href="/logout" class="block px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 font-semibold">
-                        🚪 Sair da Conta
-                    </a>
+                    <a href="/logout" class="block px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 font-semibold">🚪 Sair da Conta</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto p-6 space-y-6">
-        <!-- Navegação por Abas -->
-        <div class="flex border-b border-slate-200 dark:border-darkborder space-x-4 no-print">
-            <button onclick="switchTab('clientes')" id="tab-clientes" class="tab-btn py-2 px-4 border-b-2 font-bold">👥 Clientes</button>
-            <button onclick="switchTab('financeiro')" id="tab-financeiro" class="tab-btn py-2 px-4 border-b-2 font-bold">💰 Financeiro</button>
-            <button onclick="switchTab('certificados')" id="tab-certificados" class="tab-btn py-2 px-4 border-b-2 font-bold">🔒 Certificados Digitais</button>
-            <button onclick="switchTab('relatorios')" id="tab-relatorios" class="tab-btn py-2 px-4 border-b-2 font-bold">📊 Relatórios</button>
-        </div>
-
         <!-- ABA 1: CLIENTES -->
         <div id="content-clientes" class="tab-content space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <h2 class="text-lg font-bold">Gestão de Clientes ({{ clientes|length }})</h2>
                 <div class="flex items-center space-x-2 w-full md:w-auto">
-                    <input type="text" id="filtroCliente" onkeyup="filtrarTabela()" placeholder="🔍 Filtrar clientes..." class="p-2 text-sm rounded-lg bg-white dark:bg-darkcard border border-slate-300 dark:border-darkborder w-full md:w-64">
+                    <button onclick="apagarSelecionados('cliente')" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition whitespace-nowrap">🗑️ Excluir Selecionados</button>
+                    <input type="text" id="filtroCliente" onkeyup="filtrarTabela()" placeholder="🔍 Filtrar..." class="p-2 text-sm rounded-lg bg-white dark:bg-darkcard border border-slate-300 dark:border-darkborder w-full md:w-48">
                     <button onclick="openModal('modalNovoCliente')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition whitespace-nowrap">+ Novo Cliente</button>
                 </div>
             </div>
@@ -102,31 +81,32 @@
             <div class="bg-white dark:bg-darkcard rounded-xl shadow-sm border border-slate-200 dark:border-darkborder overflow-hidden">
                 <table class="w-full text-left border-collapse" id="tabelaClientes">
                     <thead>
-                        <tr class="bg-slate-50 dark:bg-zinc-900/50 text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold border-b border-slate-200 dark:border-darkborder">
-                            <th class="py-3 px-4 sortable" onclick="sortTable('tabelaClientes', 0)">Status ⇕</th>
-                            <th class="py-3 px-4 sortable" onclick="sortTable('tabelaClientes', 1)">Empresa / CNPJ ⇕</th>
-                            <th class="py-3 px-4 sortable" onclick="sortTable('tabelaClientes', 2)">Contato / Whats ⇕</th>
-                            <th class="py-3 px-4 sortable" onclick="sortTable('tabelaClientes', 3)">Sistema ⇕</th>
+                        <tr class="bg-slate-50 dark:bg-zinc-900/50 text-xs text-slate-500 uppercase font-semibold border-b border-slate-200 dark:border-darkborder">
+                            <th class="py-3 px-4 w-10"><input type="checkbox" onclick="toggleAll(this, 'cliente_id')" class="w-4 h-4 rounded"></th>
+                            <th class="py-3 px-4 sortable" onclick="sortTable('tabelaClientes', 1)">Status ⇕</th>
+                            <th class="py-3 px-4 sortable" onclick="sortTable('tabelaClientes', 2)">Empresa / CNPJ ⇕</th>
+                            <th class="py-3 px-4 sortable" onclick="sortTable('tabelaClientes', 3)">Contato / Whats ⇕</th>
+                            <th class="py-3 px-4 sortable" onclick="sortTable('tabelaClientes', 4)">Sistema ⇕</th>
                             <th class="py-3 px-4 text-right">Ações</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-zinc-900 text-sm">
                         {% for c in clientes %}
                         <tr class="hover:bg-slate-50 dark:hover:bg-zinc-900/40">
+                            <td class="py-3 px-4"><input type="checkbox" name="cliente_id" value="{{ c.id }}" class="w-4 h-4 rounded"></td>
                             <td class="py-3 px-4">
                                 {% if c.status_fmt == 'ATIVO' %}
-                                    <span class="px-2.5 py-1 text-xs font-black rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">🟢 ATIVO</span>
+                                    <span class="px-2.5 py-1 text-xs font-black rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 whitespace-nowrap">🟢 ATIVO</span>
                                 {% else %}
-                                    <span class="px-2.5 py-1 text-xs font-black rounded-full bg-red-500/20 text-red-400 border border-red-500/40">🔴 INATIVO</span>
+                                    <span class="px-2.5 py-1 text-xs font-black rounded-full bg-red-500/20 text-red-400 border border-red-500/40 whitespace-nowrap">🔴 INATIVO</span>
                                 {% endif %}
                             </td>
-                            <td class="py-3 px-4 font-semibold cursor-pointer hover:text-blue-500" onclick='verDashboardCliente({{ c|tojson }})'>
+                            <td class="py-3 px-4 font-semibold cursor-pointer hover:text-blue-500">
                                 {{ c.empresa }}<br><span class="text-xs text-slate-400 font-normal">{{ c.cnpj or '-' }}</span>
                             </td>
                             <td class="py-3 px-4">{{ c.contato or '-' }}<br><span class="text-xs text-slate-400">{{ c.telefone or '-' }}</span></td>
                             <td class="py-3 px-4"><span class="bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-xs">{{ c.sistema or '-' }}</span></td>
                             <td class="py-3 px-4 text-right space-x-2">
-                                <button onclick='verDashboardCliente({{ c|tojson }})' class="text-emerald-500 hover:underline font-semibold text-xs">Painel</button>
                                 <button onclick='openEditModal({{ c|tojson }})' class="text-blue-500 hover:underline font-semibold text-xs">Editar</button>
                                 <a href="/cliente/deletar/{{ c.id }}?tab=clientes" onclick="return confirm('Tem certeza que deseja excluir?')" class="text-red-500 hover:underline font-semibold text-xs">Excluir</a>
                             </td>
@@ -144,16 +124,19 @@
                     <label class="text-sm font-semibold">Mês de Referência:</label>
                     <input type="month" id="filtroMes" value="{{ mes_atual }}" onchange="filtrarMesFinanceiro(this.value)" class="p-2 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 text-sm">
                 </div>
-                <button onclick="openModal('modalNovoLancamento')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition">+ Novo Lançamento</button>
+                <div class="space-x-2">
+                    <button onclick="apagarSelecionados('financeiro')" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition">🗑️ Excluir Selecionados</button>
+                    <button onclick="openModal('modalNovoLancamento')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition">+ Novo Lançamento</button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white dark:bg-darkcard p-5 rounded-xl shadow-sm border border-slate-200 dark:border-darkborder">
-                    <p class="text-sm font-medium text-slate-500">Contas a Receber (Receita)</p>
+                    <p class="text-sm font-medium text-slate-500">Contas a Receber</p>
                     <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">R$ {{ "%.2f"|format(total_receita) }}</p>
                 </div>
                 <div class="bg-white dark:bg-darkcard p-5 rounded-xl shadow-sm border border-slate-200 dark:border-darkborder">
-                    <p class="text-sm font-medium text-slate-500">Contas a Pagar (Despesas)</p>
+                    <p class="text-sm font-medium text-slate-500">Contas a Pagar</p>
                     <p class="text-2xl font-bold text-red-500 dark:text-red-400 mt-1">R$ {{ "%.2f"|format(total_custo) }}</p>
                 </div>
                 <div class="bg-white dark:bg-darkcard p-5 rounded-xl shadow-sm border border-slate-200 dark:border-darkborder">
@@ -163,26 +146,28 @@
             </div>
 
             <div class="bg-white dark:bg-darkcard rounded-xl shadow-sm border border-slate-200 dark:border-darkborder p-4">
-                <h3 class="font-bold text-lg mb-4">Extrato Financeiro (Mês {{ mes_atual }})</h3>
+                <h3 class="font-bold text-lg mb-4">Extrato (Mês {{ mes_atual }})</h3>
                 <table class="w-full text-left border-collapse text-sm" id="tabelaFinanceiro">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-zinc-900/50 text-xs text-slate-500 uppercase font-semibold">
-                            <th class="py-2 px-3 sortable" onclick="sortTable('tabelaFinanceiro', 0)">Tipo ⇕</th>
-                            <th class="py-2 px-3 sortable" onclick="sortTable('tabelaFinanceiro', 1)">Cliente / Fornecedor ⇕</th>
-                            <th class="py-2 px-3 sortable" onclick="sortTable('tabelaFinanceiro', 2)">Valor ⇕</th>
-                            <th class="py-2 px-3 sortable" onclick="sortTable('tabelaFinanceiro', 3)">Vencimento ⇕</th>
-                            <th class="py-2 px-3 sortable" onclick="sortTable('tabelaFinanceiro', 4)">Status ⇕</th>
+                            <th class="py-2 px-3 w-10"><input type="checkbox" onclick="toggleAll(this, 'financeiro_id')" class="w-4 h-4 rounded"></th>
+                            <th class="py-2 px-3">Tipo</th>
+                            <th class="py-2 px-3">Cliente</th>
+                            <th class="py-2 px-3">Valor</th>
+                            <th class="py-2 px-3">Venc.</th>
+                            <th class="py-2 px-3">Status</th>
                             <th class="py-2 px-3 text-right">Ações</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-zinc-900">
                         {% for cob in cobrancas %}
                         <tr>
+                            <td class="py-2 px-3"><input type="checkbox" name="financeiro_id" value="{{ cob.id }}" class="w-4 h-4 rounded"></td>
                             <td class="py-2 px-3 font-bold text-xs">
                                 {% if cob.tipo_fmt == 'RECEITA' %}
-                                    <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🟢 RECEITA</span>
+                                    <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 whitespace-nowrap border border-emerald-500/30">🟢 REC</span>
                                 {% else %}
-                                    <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">🔴 DESPESA</span>
+                                    <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 whitespace-nowrap border border-red-500/30">🔴 DESP</span>
                                 {% endif %}
                             </td>
                             <td class="py-2 px-3 font-semibold">{{ cob.nome_exibicao }}</td>
@@ -190,19 +175,18 @@
                             <td class="py-2 px-3">{{ cob.data_vencimento or '-' }}</td>
                             <td class="py-2 px-3">
                                 {% if cob.status_fmt == 'PAGO' %}
-                                    <span class="px-2 py-0.5 text-xs font-bold rounded bg-emerald-500/20 text-emerald-400">PAGO</span>
+                                    <span class="px-2 py-0.5 text-xs font-bold rounded bg-emerald-500/20 text-emerald-400 whitespace-nowrap">PAGO</span>
                                 {% elif cob.status_fmt == 'VENCIDO' %}
-                                    <span class="px-2 py-0.5 text-xs font-bold rounded bg-red-500/20 text-red-400">VENCIDO</span>
+                                    <span class="px-2 py-0.5 text-xs font-bold rounded bg-red-500/20 text-red-400 whitespace-nowrap">VENCIDO</span>
                                 {% else %}
-                                    <span class="px-2 py-0.5 text-xs font-bold rounded bg-amber-500/20 text-amber-400">A VENCER</span>
+                                    <span class="px-2 py-0.5 text-xs font-bold rounded bg-amber-500/20 text-amber-400 whitespace-nowrap">A VENCER</span>
                                 {% endif %}
                             </td>
                             <td class="py-2 px-3 text-right space-x-2">
                                 {% if cob.status_fmt != 'PAGO' %}
-                                    <a href="/financeiro/pagar/{{ cob.id }}?tab=financeiro&mes={{ mes_atual }}" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded font-semibold">Marcar Pago</a>
+                                    <a href="/financeiro/pagar/{{ cob.id }}?tab=financeiro&mes={{ mes_atual }}" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded font-semibold whitespace-nowrap">Marcar Pago</a>
                                 {% endif %}
                                 <button onclick='openEditLancamentoModal({{ cob|tojson }})' class="text-blue-500 hover:underline font-semibold text-xs">Editar</button>
-                                <a href="/financeiro/deletar/{{ cob.id }}?tab=financeiro&mes={{ mes_atual }}" onclick="return confirm('Excluir este lançamento?')" class="text-red-500 hover:underline font-semibold text-xs">Excluir</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -211,25 +195,25 @@
             </div>
         </div>
 
-        <!-- ABA 3: CERTIFICADOS DIGITAIS -->
+        <!-- ABA 3: CERTIFICADOS -->
         <div id="content-certificados" class="tab-content hidden space-y-4">
-            <h2 class="text-lg font-bold">Monitoramento de Certificados Digitais</h2>
+            <h2 class="text-lg font-bold">Monitoramento de Certificados (Somente Ativos)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {% for cert in certificados %}
                 <div class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border {{ 'border-red-500' if cert.status_cor == 'vermelho' else ('border-amber-400' if cert.status_cor == 'amarelo' else 'border-slate-200 dark:border-darkborder') }} space-y-3">
                     <div class="flex justify-between items-start">
                         <p class="font-bold text-base">{{ cert.empresa }}</p>
                         {% if cert.status_cor == 'vermelho' %}
-                            <span class="text-xs font-bold bg-red-500/20 text-red-400 px-2 py-0.5 rounded">VENCIDO</span>
+                            <span class="text-xs font-bold bg-red-500/20 text-red-400 px-2 py-0.5 rounded whitespace-nowrap">VENCIDO</span>
                         {% elif cert.status_cor == 'amarelo' %}
-                            <span class="text-xs font-bold bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">ATENÇÃO</span>
+                            <span class="text-xs font-bold bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded whitespace-nowrap">ATENÇÃO</span>
                         {% else %}
-                            <span class="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">EM DIA</span>
+                            <span class="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded whitespace-nowrap">EM DIA</span>
                         {% endif %}
                     </div>
-                    <p class="text-xs text-slate-400">Contato: {{ cert.contato or 'N/A' }} ({{ cert.telefone or 'Sem Whats' }})</p>
+                    <p class="text-xs text-slate-400">Contato: {{ cert.contato or 'N/A' }} ({{ cert.telefone or 'S/ Número' }})</p>
                     <p class="text-xs font-semibold">Vencimento: {{ cert.vencimento_fmt }} ({{ cert.dias }} dias)</p>
-                    <button onclick="openModalCert('{{ cert.id }}', '{{ cert.empresa }}', '{{ cert.vencimento_raw }}')" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-1.5 rounded transition">✏️ Atualizar Vencimento</button>
+                    <button onclick="openModalCert('{{ cert.id }}', '{{ cert.empresa }}', '{{ cert.vencimento_raw }}')" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-1.5 rounded transition">✏️ Atualizar</button>
                 </div>
                 {% endfor %}
             </div>
@@ -239,69 +223,81 @@
         <div id="content-relatorios" class="tab-content hidden space-y-6">
             <h2 class="text-xl font-bold">📊 Central de Relatórios</h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card Cliente -->
                 <div class="bg-white dark:bg-darkcard p-6 rounded-xl border border-slate-200 dark:border-darkborder shadow-sm flex flex-col justify-between">
                     <div>
                         <div class="text-3xl mb-2">👥</div>
-                        <h3 class="font-bold text-lg">Relatório de Clientes</h3>
-                        <p class="text-sm text-slate-400 mt-1">Gere listagens customizadas de clientes filtrando por status.</p>
+                        <h3 class="font-bold text-lg">Clientes</h3>
+                        <p class="text-sm text-slate-400 mt-1">Listagens customizadas por status.</p>
                     </div>
-                    <button onclick="openModal('modalFiltroRelatorioClientes')" class="mt-6 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">⚙️ Emitir Relatório de Clientes</button>
+                    <button onclick="openModal('modalFiltroRelatorioClientes')" class="mt-6 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg text-sm">Emitir</button>
                 </div>
-
+                <!-- Card Financeiro -->
                 <div class="bg-white dark:bg-darkcard p-6 rounded-xl border border-slate-200 dark:border-darkborder shadow-sm flex flex-col justify-between">
                     <div>
                         <div class="text-3xl mb-2">💰</div>
-                        <h3 class="font-bold text-lg">Relatório Financeiro Customizado</h3>
-                        <p class="text-sm text-slate-400 mt-1">Filtre por período e selecione obrigatoriamente um cliente cadastrado.</p>
+                        <h3 class="font-bold text-lg">Financeiro</h3>
+                        <p class="text-sm text-slate-400 mt-1">Filtre por mês, tipo, status e cliente.</p>
                     </div>
-                    <button onclick="openModal('modalFiltroRelatorioFinanceiro')" class="mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">⚙️ Emitir Relatório Financeiro</button>
+                    <button onclick="openModal('modalFiltroRelatorioFinanceiro')" class="mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded-lg text-sm">Emitir</button>
+                </div>
+                <!-- Card Certificados -->
+                <div class="bg-white dark:bg-darkcard p-6 rounded-xl border border-slate-200 dark:border-darkborder shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="text-3xl mb-2">🔒</div>
+                        <h3 class="font-bold text-lg">Certificados</h3>
+                        <p class="text-sm text-slate-400 mt-1">Acompanhe renovações pendentes e em dia.</p>
+                    </div>
+                    <button onclick="openModal('modalFiltroRelatorioCertificados')" class="mt-6 bg-amber-600 hover:bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg text-sm">Emitir</button>
                 </div>
             </div>
 
-            <!-- RELATÓRIO DINÂMICO VIA JAVASCRIPT (CLIENTES) -->
-            <div id="areaRelatorioGerado" class="hidden bg-white text-black p-8 rounded-xl shadow-lg border border-slate-300 space-y-6">
-                <div class="flex justify-between items-center border-b pb-4">
+            <!-- AREA DE RELATÓRIO DINAMICO (CLIENTE / CERTIFICADOS) -->
+            <div id="areaRelatorioGerado" class="hidden bg-white dark:bg-darkcard text-slate-900 dark:text-slate-100 p-8 rounded-xl shadow-lg border border-slate-300 dark:border-darkborder space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-200 dark:border-darkborder pb-4">
                     <div class="flex items-center space-x-3">
                         <img src="/static/logo.png" class="h-8 w-auto">
-                        <h2 class="text-xl font-extrabold text-blue-700" id="relatorioTitulo">Relatório Emitido</h2>
+                        <h2 class="text-xl font-extrabold text-blue-600 dark:text-blue-400" id="relatorioTitulo">Relatório Emitido</h2>
                     </div>
-                    <button onclick="window.print()" class="no-print bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir / Salvar PDF</button>
+                    <button onclick="window.print()" class="no-print bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir</button>
                 </div>
                 <div id="relatorioConteudo" class="text-sm space-y-4"></div>
             </div>
 
-            <!-- RELATÓRIO FINANCEIRO VINDO DO SERVIDOR (BACKEND) -->
-            {% if data_inicio or data_fim or filtro_cliente %}
-            <div class="bg-white text-black p-8 rounded-xl shadow-lg border border-slate-300 space-y-6 mt-6">
-                <div class="flex justify-between items-center border-b pb-4">
+            <!-- RELATÓRIO FINANCEIRO VINDO DO BACKEND (DARK/LIGHT ADAPTADO) -->
+            {% if mes_relatorio or tipo_relatorio or status_relatorio or filtro_cliente %}
+            <div class="bg-white dark:bg-darkcard text-slate-900 dark:text-slate-100 p-8 rounded-xl shadow-lg border border-slate-300 dark:border-darkborder space-y-6 mt-6">
+                <div class="flex justify-between items-center border-b border-slate-200 dark:border-darkborder pb-4">
                     <div class="flex items-center space-x-3">
                         <img src="/static/logo.png" class="h-8 w-auto">
-                        <h2 class="text-xl font-extrabold text-blue-700">Relatório Financeiro Personalizado</h2>
+                        <h2 class="text-xl font-extrabold text-blue-600 dark:text-blue-400">Relatório Financeiro</h2>
                     </div>
-                    <button onclick="window.print()" class="no-print bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir / Salvar PDF</button>
+                    <button onclick="window.print()" class="no-print bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir</button>
                 </div>
-                <div class="text-xs text-gray-500 mb-2">
-                    Período: {{ data_inicio or 'Início' }} até {{ data_fim or 'Fim' }} | Cliente: {{ filtro_cliente or 'Todos' }} | Total de Registros: {{ cobrancas_relatorio|length }}
+                <div class="text-xs text-slate-500 dark:text-slate-400 mb-2 font-semibold">
+                    Filtros -> Mês: {{ mes_relatorio or 'Todos' }} | Tipo: {{ tipo_relatorio or 'Todos' }} | Status: {{ status_relatorio or 'Todos' }} | Cliente: {{ filtro_cliente or 'Todos' }} | Registros: {{ cobrancas_relatorio|length }}
                 </div>
-                <table class="w-full text-left border-collapse border border-gray-300 text-xs">
+                <table class="w-full text-left border-collapse border border-slate-300 dark:border-darkborder text-xs">
                     <thead>
-                        <tr class="bg-gray-100 border-b border-gray-300">
-                            <th class="p-2 border border-gray-300">Tipo</th>
-                            <th class="p-2 border border-gray-300">Cliente</th>
-                            <th class="p-2 border border-gray-300">Valor</th>
-                            <th class="p-2 border border-gray-300">Vencimento</th>
-                            <th class="p-2 border border-gray-300">Status</th>
+                        <tr class="bg-slate-100 dark:bg-zinc-900 border-b border-slate-300 dark:border-darkborder">
+                            <th class="p-2 border border-slate-300 dark:border-darkborder">Mês</th>
+                            <th class="p-2 border border-slate-300 dark:border-darkborder">Tipo</th>
+                            <th class="p-2 border border-slate-300 dark:border-darkborder">Cliente</th>
+                            <th class="p-2 border border-slate-300 dark:border-darkborder">Valor</th>
+                            <th class="p-2 border border-slate-300 dark:border-darkborder">Vencimento</th>
+                            <th class="p-2 border border-slate-300 dark:border-darkborder">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for r in cobrancas_relatorio %}
-                        <tr class="border-b border-gray-200">
-                            <td class="p-2 border border-gray-300 font-bold {{ 'text-emerald-600' if r.tipo_fmt == 'RECEITA' else 'text-red-600' }}">{{ r.tipo_fmt }}</td>
-                            <td class="p-2 border border-gray-300 font-semibold">{{ r.nome_exibicao }}</td>
-                            <td class="p-2 border border-gray-300 font-bold">R$ {{ "%.2f"|format(r.valor|float) }}</td>
-                            <td class="p-2 border border-gray-300">{{ r.data_vencimento or '-' }}</td>
-                            <td class="p-2 border border-gray-300 font-bold">{{ r.status_fmt }}</td>
+                        <tr class="border-b border-slate-200 dark:border-zinc-900">
+                            <td class="p-2 border border-slate-300 dark:border-darkborder font-bold">{{ r.mes }}</td>
+                            <td class="p-2 border border-slate-300 dark:border-darkborder font-bold {{ 'text-emerald-500' if r.tipo_fmt == 'RECEITA' else 'text-red-500' }}">{{ r.tipo_fmt }}</td>
+                            <td class="p-2 border border-slate-300 dark:border-darkborder font-semibold">{{ r.nome_exibicao }}</td>
+                            <td class="p-2 border border-slate-300 dark:border-darkborder font-bold">R$ {{ "%.2f"|format(r.valor|float) }}</td>
+                            <td class="p-2 border border-slate-300 dark:border-darkborder">{{ r.data_vencimento or '-' }}</td>
+                            <td class="p-2 border border-slate-300 dark:border-darkborder font-bold">{{ r.status_fmt }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -311,105 +307,152 @@
         </div>
     </div>
 
-    <!-- MODAL FILTRO RELATÓRIO CLIENTES -->
-    <div id="modalFiltroRelatorioClientes" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-md w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
-            <h3 class="text-lg font-bold">Filtros - Relatório de Clientes</h3>
-            <div class="space-y-3 text-sm">
-                <div>
-                    <label class="text-xs text-slate-500">Status do Cliente</label>
-                    <select id="rel_cli_status" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                        <option value="TODOS">Todos os Status</option>
-                        <option value="ATIVO">Somente Ativos</option>
-                        <option value="INATIVO">Somente Inativos</option>
-                    </select>
-                </div>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModal('modalFiltroRelatorioClientes')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
-                    <button type="button" onclick="gerarRelatorioClientes()" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500">Gerar Relatório</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL FILTRO RELATÓRIO FINANCEIRO -->
-    <div id="modalFiltroRelatorioFinanceiro" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-md w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
-            <h3 class="text-lg font-bold">Filtros - Relatório Financeiro</h3>
-            <form method="GET" action="/dashboard" class="space-y-3 text-sm">
-                <input type="hidden" name="tab" value="relatorios">
-                <div>
-                    <label class="text-xs text-slate-500">Data Inicial</label>
-                    <input type="date" name="data_inicio" value="{{ data_inicio }}" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                </div>
-                <div>
-                    <label class="text-xs text-slate-500">Data Final</label>
-                    <input type="date" name="data_fim" value="{{ data_fim }}" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                </div>
-                <div>
-                    <label class="text-xs text-slate-500">Cliente (Selecione da Lista)</label>
-                    <select name="filtro_cliente" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 font-semibold">
-                        <option value="">-- Todos os Clientes --</option>
-                        {% for c in clientes %}
-                            <option value="{{ c.empresa }}" {% if filtro_cliente == c.empresa %}selected{% endif %}>{{ c.empresa }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModal('modalFiltroRelatorioFinanceiro')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white font-semibold hover:bg-emerald-500">Filtrar e Exibir</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAIS DE PERFIL E CONTAS -->
+    <!-- MODAL CONFIGURAR PERFIL -->
     <div id="modalPerfilConfig" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-md w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
-            <h3 class="text-lg font-bold">⚙️ Configurações de Perfil</h3>
-            <form action="/usuario/editar" method="POST" class="space-y-3 text-sm">
-                <input type="hidden" name="tab" value="perfil">
-                <input type="hidden" name="id" value="{{ usuario.id }}">
+            <h3 class="text-lg font-bold">⚙️ Configurar Meu Perfil</h3>
+            <form action="/usuario/configurar" method="POST" class="space-y-3 text-sm">
+                <input type="hidden" name="tab" value="clientes">
                 <div>
-                    <label class="text-xs text-slate-500">Nome de Exibição</label>
-                    <input type="text" name="nome" value="{{ usuario.nome }}" required class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
+                    <label class="text-xs text-slate-400">Nome do Usuário</label>
+                    <input type="text" name="nome" value="{{ usuario.nome }}" required class="w-full mt-1 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-darkborder">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-500">E-mail</label>
-                    <input type="email" name="email" value="{{ usuario.email }}" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
+                    <label class="text-xs text-slate-400">Nome de Usuário / E-mail de Login</label>
+                    <input type="text" name="email" value="{{ usuario.email }}" required class="w-full mt-1 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-darkborder">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400">URL da Foto de Perfil (Opcional)</label>
+                    <input type="text" name="foto" value="{{ usuario.foto }}" placeholder="https://exemplo.com/foto.jpg" class="w-full mt-1 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-darkborder">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400">Nova Senha (Deixe em branco para não alterar)</label>
+                    <input type="password" name="senha" placeholder="Nova senha" class="w-full mt-1 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-darkborder">
                 </div>
                 <div class="flex justify-end space-x-2 pt-2">
                     <button type="button" onclick="closeModal('modalPerfilConfig')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500">Salvar Alterações</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold">Salvar Alterações</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- MODAL GERENCIAR CONTAS -->
     <div id="modalGerenciarContas" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-lg w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
-            <h3 class="text-lg font-bold">👥 Contas do Sistema</h3>
-            <div class="space-y-2 max-h-40 overflow-y-auto">
-                {% for u in usuarios %}
-                <div class="flex justify-between items-center p-2 rounded bg-slate-50 dark:bg-zinc-900 text-xs">
-                    <div>
-                        <p class="font-bold text-sm">{{ u.nome }}</p>
-                        <p class="text-slate-400">{{ u.email }} - Cargo: {{ u.cargo }}</p>
-                    </div>
-                    <a href="/usuario/deletar/{{ u.id }}?tab=perfil" onclick="return confirm('Deseja excluir este usuário?')" class="text-red-500 font-bold hover:underline">Excluir</a>
-                </div>
-                {% endfor %}
+        <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-xl w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-darkborder pb-3">
+                <h3 class="text-lg font-bold">👥 Gerenciar Contas de Acesso</h3>
+                <button onclick="openModal('modalNovoUsuario')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3 py-1.5 rounded">+ Nova Conta</button>
             </div>
-            <hr class="border-slate-200 dark:border-zinc-800">
-            <h4 class="font-bold text-sm">Cadastrar Novo Usuário</h4>
-            <form action="/usuario/novo" method="POST" class="grid grid-cols-2 gap-2 text-sm">
-                <input type="hidden" name="tab" value="perfil">
-                <input type="text" name="nome" placeholder="Nome Completo" required class="col-span-2 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <input type="email" name="email" placeholder="E-mail" required class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <input type="password" name="senha" placeholder="Senha" required class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <div class="col-span-2 flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModal('modalGerenciarContas')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Fechar</button>
-                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500">+ Adicionar</button>
+            <div class="max-h-64 overflow-y-auto space-y-2">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="text-xs text-slate-400 border-b border-slate-200 dark:border-darkborder">
+                            <th class="py-2">Nome</th>
+                            <th class="py-2">Login</th>
+                            <th class="py-2">Cargo</th>
+                            <th class="py-2 text-right">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-zinc-900">
+                        {% for u in usuarios %}
+                        <tr>
+                            <td class="py-2 font-semibold">{{ u.nome }}</td>
+                            <td class="py-2 text-slate-400 text-xs">{{ u.email }}</td>
+                            <td class="py-2"><span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-0.5 rounded font-bold">{{ u.cargo }}</span></td>
+                            <td class="py-2 text-right">
+                                {% if u.id != usuario.id %}
+                                    <a href="/usuario/deletar/{{ u.id }}?tab=clientes" onclick="return confirm('Excluir esta conta?')" class="text-red-500 text-xs font-semibold hover:underline">Excluir</a>
+                                {% else %}
+                                    <span class="text-xs text-slate-500">(Atual)</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button type="button" onclick="closeModal('modalGerenciarContas')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold text-sm">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NOVO USUÁRIO -->
+    <div id="modalNovoUsuario" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-md w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
+            <h3 class="text-lg font-bold">Cadastrar Nova Conta</h3>
+            <form action="/usuario/novo" method="POST" class="space-y-3 text-sm">
+                <input type="hidden" name="tab" value="clientes">
+                <input type="text" name="nome" placeholder="Nome Completo" required class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-darkborder">
+                <input type="text" name="email" placeholder="Usuário / E-mail de Login" required class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-darkborder">
+                <input type="password" name="senha" placeholder="Senha" required class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-darkborder">
+                <select name="cargo" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-darkborder font-semibold">
+                    <option value="Admin">Admin</option>
+                    <option value="Operador">Operador</option>
+                </select>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('modalNovoUsuario')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAIS DE RELATÓRIO E CLIENTES -->
+    <div id="modalFiltroRelatorioClientes" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white dark:bg-darkcard p-6 rounded-xl w-full max-w-md space-y-4 shadow-2xl">
+            <h3 class="font-bold text-lg">Filtro de Clientes</h3>
+            <select id="rel_cli_status" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border">
+                <option value="TODOS">Todos</option><option value="ATIVO">Somente Ativos</option><option value="INATIVO">Somente Inativos</option>
+            </select>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('modalFiltroRelatorioClientes')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold text-sm">Cancelar</button>
+                <button onclick="gerarRelatorioClientes()" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold text-sm">Gerar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalFiltroRelatorioCertificados" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white dark:bg-darkcard p-6 rounded-xl w-full max-w-md space-y-4 shadow-2xl">
+            <h3 class="font-bold text-lg">Filtro de Certificados</h3>
+            <select id="rel_cert_status" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border">
+                <option value="TODOS">Todos os Status</option>
+                <option value="EM DIA">Somente EM DIA</option>
+                <option value="ATENCAO">Somente ATENÇÃO</option>
+                <option value="VENCIDO">Somente VENCIDOS</option>
+            </select>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('modalFiltroRelatorioCertificados')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold text-sm">Cancelar</button>
+                <button onclick="gerarRelatorioCertificados()" class="px-4 py-2 rounded bg-amber-600 text-white font-semibold text-sm">Gerar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalFiltroRelatorioFinanceiro" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white dark:bg-darkcard p-6 rounded-xl w-full max-w-md space-y-4 shadow-2xl">
+            <h3 class="font-bold text-lg">Filtro Financeiro</h3>
+            <form method="GET" action="/dashboard" class="space-y-3 text-sm">
+                <input type="hidden" name="tab" value="relatorios">
+                <input type="month" name="mes_relatorio" value="{{ mes_relatorio }}" class="w-full p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <select name="tipo_relatorio" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">
+                    <option value="">-- Todos os Tipos --</option>
+                    <option value="RECEITA" {% if tipo_relatorio == 'RECEITA' %}selected{% endif %}>🟢 Receitas (A Receber)</option>
+                    <option value="DESPESA" {% if tipo_relatorio == 'DESPESA' %}selected{% endif %}>🔴 Despesas (A Pagar)</option>
+                </select>
+                <select name="status_relatorio" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">
+                    <option value="">-- Todos os Status --</option>
+                    <option value="A VENCER" {% if status_relatorio == 'A VENCER' %}selected{% endif %}>A Vencer</option>
+                    <option value="PAGO" {% if status_relatorio == 'PAGO' %}selected{% endif %}>Pago</option>
+                    <option value="VENCIDO" {% if status_relatorio == 'VENCIDO' %}selected{% endif %}>Vencido</option>
+                </select>
+                <select name="filtro_cliente" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">
+                    <option value="">-- Todos os Clientes --</option>
+                    {% for c in clientes %}<option value="{{ c.empresa }}" {% if filtro_cliente == c.empresa %}selected{% endif %}>{{ c.empresa }}</option>{% endfor %}
+                </select>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('modalFiltroRelatorioFinanceiro')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white font-semibold">Emitir</button>
                 </div>
             </form>
         </div>
@@ -427,22 +470,15 @@
                 <input type="text" name="telefone" placeholder="Telefone" class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
                 <input type="text" name="sistema" placeholder="Sistema" class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
                 <select name="status_cliente" class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                    <option value="ATIVO">ATIVO</option>
-                    <option value="INATIVO">INATIVO</option>
+                    <option value="ATIVO">ATIVO</option><option value="INATIVO">INATIVO</option>
                 </select>
                 <input type="text" name="modulos" placeholder="Módulos" class="col-span-2 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <div class="col-span-2">
-                    <label class="text-xs text-slate-500">Vencimento Certificado</label>
-                    <input type="date" name="vencimento_cert" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                </div>
-                <div class="col-span-2 flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModal('modalNovoCliente')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500">Salvar</button>
-                </div>
+                <div class="col-span-2"><label class="text-xs text-slate-500">Venc. Certificado</label><input type="date" name="vencimento_cert" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800"></div>
+                <div class="col-span-2 flex justify-end space-x-2 pt-2"><button type="button" onclick="closeModal('modalNovoCliente')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button><button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold">Salvar</button></div>
             </form>
         </div>
     </div>
-
+    
     <!-- MODAL EDITAR CLIENTE -->
     <div id="modalEditarCliente" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-lg w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
@@ -450,24 +486,15 @@
             <form action="/cliente/editar" method="POST" class="grid grid-cols-2 gap-3 text-sm">
                 <input type="hidden" name="tab" value="clientes">
                 <input type="hidden" id="edit_id" name="id">
-                <input type="text" id="edit_empresa" name="empresa" placeholder="Empresa" required class="col-span-2 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <input type="text" id="edit_cnpj" name="cnpj" placeholder="CNPJ" class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <input type="text" id="edit_contato" name="contato" placeholder="Contato" class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <input type="text" id="edit_telefone" name="telefone" placeholder="Telefone" class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <input type="text" id="edit_sistema" name="sistema" placeholder="Sistema" class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <select id="edit_status" name="status_cliente" class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                    <option value="ATIVO">ATIVO</option>
-                    <option value="INATIVO">INATIVO</option>
-                </select>
-                <input type="text" id="edit_modulos" name="modulos" placeholder="Módulos" class="col-span-2 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <div class="col-span-2">
-                    <label class="text-xs text-slate-500">Vencimento Certificado</label>
-                    <input type="date" id="edit_vencimento_cert" name="vencimento_cert" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                </div>
-                <div class="col-span-2 flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModal('modalEditarCliente')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500">Atualizar</button>
-                </div>
+                <input type="text" id="edit_empresa" name="empresa" required class="col-span-2 p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <input type="text" id="edit_cnpj" name="cnpj" class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <input type="text" id="edit_contato" name="contato" class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <input type="text" id="edit_telefone" name="telefone" class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <input type="text" id="edit_sistema" name="sistema" class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <select id="edit_status" name="status_cliente" class="p-2 rounded border bg-slate-100 dark:bg-zinc-900"><option value="ATIVO">ATIVO</option><option value="INATIVO">INATIVO</option></select>
+                <input type="text" id="edit_modulos" name="modulos" class="col-span-2 p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <div class="col-span-2"><label class="text-xs text-slate-500">Vencimento Certificado</label><input type="date" id="edit_vencimento_cert" name="vencimento_cert" class="w-full p-2 rounded border bg-slate-100 dark:bg-zinc-900"></div>
+                <div class="col-span-2 flex justify-end space-x-2 pt-2"><button type="button" onclick="closeModal('modalEditarCliente')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button><button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold">Atualizar</button></div>
             </form>
         </div>
     </div>
@@ -478,174 +505,104 @@
             <h3 class="text-lg font-bold">Atualizar Certificado</h3>
             <p id="cert_nome_empresa" class="text-sm font-semibold text-blue-500"></p>
             <form action="/cliente/atualizar-cert" method="POST" class="space-y-4 text-sm">
-                <input type="hidden" name="tab" value="certificados">
-                <input type="hidden" id="cert_id" name="id">
-                <div>
-                    <label class="text-xs text-slate-500">Nova Data de Vencimento</label>
-                    <input type="date" id="cert_vencimento" name="vencimento_cert" required class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                </div>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModal('modalCertificado')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500">Salvar</button>
-                </div>
+                <input type="hidden" name="tab" value="certificados"><input type="hidden" id="cert_id" name="id">
+                <input type="date" id="cert_vencimento" name="vencimento_cert" required class="w-full p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <div class="flex justify-end space-x-2 pt-2"><button type="button" onclick="closeModal('modalCertificado')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button><button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold">Salvar</button></div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL NOVO LANÇAMENTO FINANCEIRO -->
+    <!-- MODAL NOVO LANÇAMENTO -->
     <div id="modalNovoLancamento" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-lg w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
             <h3 class="text-lg font-bold">Novo Lançamento Financeiro</h3>
             <form action="/financeiro/novo" method="POST" class="grid grid-cols-2 gap-3 text-sm">
-                <input type="hidden" name="tab" value="financeiro">
-                <input type="hidden" name="mes" id="input_mes_novo_lanc">
-                <div class="col-span-2">
-                    <label class="text-xs text-slate-500">Tipo de Lançamento</label>
-                    <select name="tipo" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 font-semibold">
-                        <option value="RECEITA" class="text-emerald-500 font-bold">🟢 RECEITA (Contas a Receber)</option>
-                        <option value="DESPESA" class="text-red-500 font-bold">🔴 DESPESA (Contas a Pagar)</option>
-                    </select>
+                <input type="hidden" name="tab" value="financeiro"><input type="hidden" name="mes" id="input_mes_novo_lanc">
+                <select name="tipo" class="col-span-2 w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900"><option value="RECEITA" class="text-emerald-500 font-bold">🟢 RECEITA (Receber)</option><option value="DESPESA" class="text-red-500 font-bold">🔴 DESPESA (Pagar)</option></select>
+                <select name="cliente_nome" required class="col-span-2 w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900"><option value="">-- Cliente --</option>{% for c in clientes %}<option value="{{ c.empresa }}">{{ c.empresa }}</option>{% endfor %}</select>
+                <input type="number" step="0.01" name="valor" placeholder="Valor (R$)" required class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <input type="date" name="data_vencimento" required class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <select name="status_pagamento" class="col-span-2 p-2 rounded border bg-slate-100 dark:bg-zinc-900"><option value="A VENCER">A VENCER</option><option value="PAGO">PAGO</option><option value="VENCIDO">VENCIDO</option></select>
+                <div class="col-span-2 flex items-center space-x-4 pt-2 border-t border-slate-200 dark:border-darkborder">
+                    <label class="flex items-center space-x-2 text-sm font-semibold cursor-pointer"><input type="checkbox" name="recorrente" id="checkRecorrente" onchange="toggleQtdMeses()" class="w-4 h-4 rounded"><span>Lançamento Recorrente?</span></label>
+                    <div id="divQtdMeses" class="hidden flex items-center space-x-2"><label class="text-xs text-slate-500">Meses?</label><input type="number" name="qtd_meses" value="2" class="w-16 p-1 rounded border bg-slate-100 dark:bg-zinc-900"></div>
                 </div>
-                <div class="col-span-2">
-                    <label class="text-xs text-slate-500">Cliente / Fornecedor (Selecione da Lista)</label>
-                    <select name="cliente_nome" required class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 font-semibold">
-                        <option value="">-- Selecione um Cliente --</option>
-                        {% for c in clientes %}
-                            <option value="{{ c.empresa }}">{{ c.empresa }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <input type="number" step="0.01" name="valor" placeholder="Valor (R$)" required class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <input type="date" name="data_vencimento" required class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <select name="status_pagamento" class="col-span-2 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                    <option value="A VENCER">A VENCER</option>
-                    <option value="PAGO">PAGO</option>
-                    <option value="VENCIDO">VENCIDO</option>
-                </select>
-                <div class="col-span-2 flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModal('modalNovoLancamento')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500">Salvar</button>
-                </div>
+                <div class="col-span-2 flex justify-end space-x-2 pt-2"><button type="button" onclick="closeModal('modalNovoLancamento')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button><button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold">Salvar</button></div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL EDITAR LANÇAMENTO FINANCEIRO -->
+    <!-- MODAL EDITAR LANÇAMENTO -->
     <div id="modalEditarLancamento" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-lg w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
-            <h3 class="text-lg font-bold">Editar Lançamento Financeiro</h3>
+            <h3 class="text-lg font-bold">Editar Lançamento</h3>
             <form action="/financeiro/editar" method="POST" class="grid grid-cols-2 gap-3 text-sm">
-                <input type="hidden" name="tab" value="financeiro">
-                <input type="hidden" name="mes" id="input_mes_edit_lanc">
-                <input type="hidden" id="edit_lanc_id" name="id">
-                <div class="col-span-2">
-                    <label class="text-xs text-slate-500">Tipo de Lançamento</label>
-                    <select id="edit_lanc_tipo" name="tipo" class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 font-semibold">
-                        <option value="RECEITA">🟢 RECEITA (Contas a Receber)</option>
-                        <option value="DESPESA">🔴 DESPESA (Contas a Pagar)</option>
-                    </select>
-                </div>
-                <div class="col-span-2">
-                    <label class="text-xs text-slate-500">Cliente / Fornecedor (Selecione da Lista)</label>
-                    <select id="edit_lanc_cliente" name="cliente_nome" required class="w-full p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 font-semibold">
-                        <option value="">-- Selecione um Cliente --</option>
-                        {% for c in clientes %}
-                            <option value="{{ c.empresa }}">{{ c.empresa }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <input type="number" step="0.01" id="edit_lanc_valor" name="valor" placeholder="Valor (R$)" required class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <input type="date" id="edit_lanc_venc" name="data_vencimento" required class="p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                <select id="edit_lanc_status" name="status_pagamento" class="col-span-2 p-2 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800">
-                    <option value="A VENCER">A VENCER</option>
-                    <option value="PAGO">PAGO</option>
-                    <option value="VENCIDO">VENCIDO</option>
-                </select>
-                <div class="col-span-2 flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModal('modalEditarLancamento')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-500">Atualizar</button>
-                </div>
+                <input type="hidden" name="tab" value="financeiro"><input type="hidden" name="mes" id="input_mes_edit_lanc"><input type="hidden" id="edit_lanc_id" name="id">
+                <select id="edit_lanc_tipo" name="tipo" class="col-span-2 w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900"><option value="RECEITA">🟢 RECEITA</option><option value="DESPESA">🔴 DESPESA</option></select>
+                <select id="edit_lanc_cliente" name="cliente_nome" required class="col-span-2 w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">{% for c in clientes %}<option value="{{ c.empresa }}">{{ c.empresa }}</option>{% endfor %}</select>
+                <input type="number" step="0.01" id="edit_lanc_valor" name="valor" required class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <input type="date" id="edit_lanc_venc" name="data_vencimento" required class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                <select id="edit_lanc_status" name="status_pagamento" class="col-span-2 p-2 rounded border bg-slate-100 dark:bg-zinc-900"><option value="A VENCER">A VENCER</option><option value="PAGO">PAGO</option><option value="VENCIDO">VENCIDO</option></select>
+                <div class="col-span-2 flex justify-end space-x-2 pt-2"><button type="button" onclick="closeModal('modalEditarLancamento')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button><button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold">Atualizar</button></div>
             </form>
-        </div>
-    </div>
-
-    <!-- MODAL DASHBOARD DO CLIENTE -->
-    <div id="modalDashCliente" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-2xl w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
-            <div class="flex justify-between items-center border-b border-slate-200 dark:border-zinc-800 pb-3">
-                <div>
-                    <h3 id="dash_empresa" class="text-xl font-bold text-blue-500"></h3>
-                    <p id="dash_cnpj" class="text-xs text-slate-400"></p>
-                </div>
-                <button onclick="closeModal('modalDashCliente')" class="text-slate-400 hover:text-white font-bold text-xl">✕</button>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4 text-sm bg-slate-50 dark:bg-zinc-900 p-3 rounded-lg">
-                <p><strong>Contato:</strong> <span id="dash_contato"></span></p>
-                <p><strong>Telefone:</strong> <span id="dash_telefone"></span></p>
-                <p><strong>Sistema:</strong> <span id="dash_sistema"></span></p>
-                <p><strong>Módulos:</strong> <span id="dash_modulos"></span></p>
-            </div>
-
-            <h4 class="font-bold text-sm">Histórico de Lançamentos Financeiros:</h4>
-            <div class="max-h-48 overflow-y-auto">
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 dark:bg-zinc-900">
-                            <th class="p-2">Data Venc.</th>
-                            <th class="p-2">Tipo</th>
-                            <th class="p-2">Valor</th>
-                            <th class="p-2">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dash_tabela_financeira" class="divide-y divide-slate-200 dark:divide-zinc-800"></tbody>
-                </table>
-            </div>
         </div>
     </div>
 
     <script>
         const todosClientes = {{ clientes|tojson }};
+        const todosCertificados = {{ certificados|tojson }};
         const todasCobrancas = {{ todas_cobrancas|tojson }};
         const tabAtivaServidor = "{{ tab }}";
-        const mesAtualServidor = "{{ mes_atual }}";
 
-        window.onload = function() {
+        window.addEventListener('load', () => {
+            const scrollPos = sessionStorage.getItem('scrollPosition');
+            if (scrollPos) { window.scrollTo(0, parseInt(scrollPos)); sessionStorage.removeItem('scrollPosition'); }
+            
             switchTab(tabAtivaServidor || 'clientes');
             const mesInput = document.getElementById('filtroMes');
             if (mesInput && mesInput.value) {
-                const elNovo = document.getElementById('input_mes_novo_lanc');
-                const elEdit = document.getElementById('input_mes_edit_lanc');
-                if(elNovo) elNovo.value = mesInput.value;
-                if(elEdit) elEdit.value = mesInput.value;
+                if(document.getElementById('input_mes_novo_lanc')) document.getElementById('input_mes_novo_lanc').value = mesInput.value;
+                if(document.getElementById('input_mes_edit_lanc')) document.getElementById('input_mes_edit_lanc').value = mesInput.value;
             }
-        };
+        });
 
-        function togglePerfilMenu() {
-            const menu = document.getElementById('perfilMenu');
-            menu.classList.toggle('hidden');
+        window.addEventListener('beforeunload', () => {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
+        });
+
+        function toggleAll(source, name) {
+            const checkboxes = document.getElementsByName(name);
+            for(let i=0; i < checkboxes.length; i++) checkboxes[i].checked = source.checked;
         }
 
-        window.onclick = function(event) {
-            if (!event.target.closest('.relative')) {
-                const menu = document.getElementById('perfilMenu');
-                if (menu && !menu.classList.contains('hidden')) {
-                    menu.classList.add('hidden');
-                }
+        function apagarSelecionados(tipo) {
+            let selecionados = Array.from(document.querySelectorAll(`input[name='${tipo}_id']:checked`)).map(cb => cb.value);
+            if (selecionados.length === 0) { alert('Selecione ao menos um registro para excluir.'); return; }
+            if (confirm(`Tem certeza que deseja apagar ${selecionados.length} registros?`)) {
+                let form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/${tipo}/deletar_varios`;
+                
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids';
+                input.value = selecionados.join(',');
+                form.appendChild(input);
+
+                let tab = document.createElement('input');
+                tab.type = 'hidden';
+                tab.name = 'tab';
+                tab.value = tipo === 'cliente' ? 'clientes' : 'financeiro';
+                form.appendChild(tab);
+
+                document.body.appendChild(form);
+                form.submit();
             }
         }
 
-        function toggleTheme() {
-            const html = document.documentElement;
-            const icon = document.getElementById('themeIcon');
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                icon.textContent = '☀️ Claro';
-            } else {
-                html.classList.add('dark');
-                icon.textContent = '🌙 Escuro';
-            }
-        }
+        function toggleQtdMeses() { document.getElementById('divQtdMeses').classList.toggle('hidden', !document.getElementById('checkRecorrente').checked); }
+        function togglePerfilMenu() { document.getElementById('perfilMenu').classList.toggle('hidden'); }
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -653,22 +610,11 @@
                 el.classList.remove('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
                 el.classList.add('border-transparent', 'text-slate-500');
             });
-
-            const targetContent = document.getElementById('content-' + tab);
-            const targetBtn = document.getElementById('tab-' + tab);
-
-            if (targetContent && targetBtn) {
-                targetContent.classList.remove('hidden');
-                targetBtn.classList.add('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
-                targetBtn.classList.remove('border-transparent', 'text-slate-500');
-            }
+            document.getElementById('content-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.add('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
         }
 
-        function openModal(id) { 
-            const menu = document.getElementById('perfilMenu');
-            if(menu) menu.classList.add('hidden');
-            document.getElementById(id).classList.remove('hidden'); 
-        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function openEditModal(cliente) {
@@ -680,7 +626,7 @@
             document.getElementById('edit_sistema').value = cliente.sistema || '';
             document.getElementById('edit_status').value = cliente.status_fmt || 'ATIVO';
             document.getElementById('edit_modulos').value = cliente.modulos || '';
-            document.getElementById('edit_vencimento_cert').value = cliente.vencimento_cert || cliente.vencimento || '';
+            document.getElementById('edit_vencimento_cert').value = cliente.vencimento_cert || '';
             openModal('modalEditarCliente');
         }
 
@@ -701,111 +647,48 @@
             openModal('modalCertificado');
         }
 
-        function filtrarTabela() {
-            const input = document.getElementById('filtroCliente').value.toLowerCase();
-            const linhas = document.querySelectorAll('#tabelaClientes tbody tr');
-            linhas.forEach(linha => {
-                const texto = linha.textContent.toLowerCase();
-                linha.style.display = texto.includes(input) ? '' : 'none';
-            });
-        }
-
-        function filtrarMesFinanceiro(mes) {
-            window.location.href = '/dashboard?tab=financeiro&mes=' + mes;
-        }
-
-        const sortDirections = {};
-        function sortTable(tableId, colIndex) {
-            const table = document.getElementById(tableId);
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            
-            const currentDir = sortDirections[tableId + colIndex] === 'asc' ? 'desc' : 'asc';
-            sortDirections[tableId + colIndex] = currentDir;
-
-            rows.sort((a, b) => {
-                const cellA = a.children[colIndex].textContent.trim().toLowerCase();
-                const cellB = b.children[colIndex].textContent.trim().toLowerCase();
-
-                if (cellA < cellB) return currentDir === 'asc' ? -1 : 1;
-                if (cellA > cellB) return currentDir === 'asc' ? 1 : -1;
-                return 0;
-            });
-
-            rows.forEach(row => tbody.appendChild(row));
-        }
-
-        function verDashboardCliente(cliente) {
-            document.getElementById('dash_empresa').textContent = cliente.empresa;
-            document.getElementById('dash_cnpj').textContent = cliente.cnpj || 'Sem CNPJ';
-            document.getElementById('dash_contato').textContent = cliente.contato || '-';
-            document.getElementById('dash_telefone').textContent = cliente.telefone || '-';
-            document.getElementById('dash_sistema').textContent = cliente.sistema || '-';
-            document.getElementById('dash_modulos').textContent = cliente.modulos || '-';
-
-            const tbody = document.getElementById('dash_tabela_financeira');
-            tbody.innerHTML = '';
-
-            const cobrancasCliente = todasCobrancas.filter(c => c.nome_exibicao === cliente.empresa || c.cliente_id == cliente.id);
-            
-            if (cobrancasCliente.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-2 text-slate-400">Nenhum lançamento encontrado para este cliente.</td></tr>';
-            } else {
-                cobrancasCliente.forEach(c => {
-                    const tr = document.createElement('tr');
-                    const corTipo = c.tipo_fmt === 'RECEITA' ? 'text-emerald-500 font-bold' : 'text-red-500 font-bold';
-                    tr.innerHTML = `
-                        <td class="p-2">${c.data_vencimento || '-'}</td>
-                        <td class="p-2 ${corTipo}">${c.tipo_fmt}</td>
-                        <td class="p-2 font-bold">R$ ${parseFloat(c.valor || 0).toFixed(2)}</td>
-                        <td class="p-2"><span class="px-1.5 py-0.5 font-bold rounded ${c.status_fmt === 'PAGO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${c.status_fmt}</span></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            openModal('modalDashCliente');
-        }
+        function filtrarMesFinanceiro(mes) { window.location.href = '/dashboard?tab=financeiro&mes=' + mes; }
 
         function gerarRelatorioClientes() {
             closeModal('modalFiltroRelatorioClientes');
-            const statusFiltro = document.getElementById('rel_cli_status').value;
-            
-            let filtrados = todosClientes;
-            if (statusFiltro !== 'TODOS') {
-                filtrados = todosClientes.filter(c => c.status_fmt === statusFiltro);
-            }
-
+            const status = document.getElementById('rel_cli_status').value;
+            let filtrados = status !== 'TODOS' ? todosClientes.filter(c => c.status_fmt === status) : todosClientes;
             document.getElementById('relatorioTitulo').textContent = 'Relatório Geral de Clientes';
             
-            let html = `
-                <div class="text-xs text-gray-500 mb-2">Filtro Aplicado: Status ${statusFiltro} | Total de Registros: ${filtrados.length}</div>
-                <table class="w-full text-left border-collapse border border-gray-300 text-xs">
-                    <thead>
-                        <tr class="bg-gray-100 border-b border-gray-300">
-                            <th class="p-2 border border-gray-300">Status</th>
-                            <th class="p-2 border border-gray-300">Empresa</th>
-                            <th class="p-2 border border-gray-300">CNPJ</th>
-                            <th class="p-2 border border-gray-300">Contato / Tel</th>
-                            <th class="p-2 border border-gray-300">Sistema</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            filtrados.forEach(c => {
-                html += `
-                    <tr class="border-b border-gray-200">
-                        <td class="p-2 border border-gray-300 font-bold">${c.status_fmt}</td>
-                        <td class="p-2 border border-gray-300 font-bold">${c.empresa}</td>
-                        <td class="p-2 border border-gray-300">${c.cnpj || '-'}</td>
-                        <td class="p-2 border border-gray-300">${c.contato || '-'} (${c.telefone || '-'})</td>
-                        <td class="p-2 border border-gray-300">${c.sistema || '-'}</td>
-                    </tr>
-                `;
-            });
-
+            let html = `<div class="text-xs text-slate-400 mb-2">Status: ${status} | Registros: ${filtrados.length}</div>
+                <table class="w-full text-left border-collapse border border-slate-300 dark:border-darkborder text-xs">
+                    <thead><tr class="bg-slate-100 dark:bg-zinc-900 border-b border-slate-300 dark:border-darkborder"><th class="p-2 border border-slate-300 dark:border-darkborder">Status</th><th class="p-2 border border-slate-300 dark:border-darkborder">Empresa</th><th class="p-2 border border-slate-300 dark:border-darkborder">CNPJ</th><th class="p-2 border border-slate-300 dark:border-darkborder">Contato</th></tr></thead><tbody>`;
+            filtrados.forEach(c => html += `<tr class="border-b border-slate-200 dark:border-zinc-900"><td class="p-2 border border-slate-300 dark:border-darkborder font-bold">${c.status_fmt}</td><td class="p-2 border border-slate-300 dark:border-darkborder font-bold">${c.empresa}</td><td class="p-2 border border-slate-300 dark:border-darkborder">${c.cnpj || '-'}</td><td class="p-2 border border-slate-300 dark:border-darkborder">${c.contato || '-'} (${c.telefone || '-'})</td></tr>`);
             html += `</tbody></table>`;
+            
+            document.getElementById('relatorioConteudo').innerHTML = html;
+            document.getElementById('areaRelatorioGerado').classList.remove('hidden');
+            document.getElementById('areaRelatorioGerado').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function gerarRelatorioCertificados() {
+            closeModal('modalFiltroRelatorioCertificados');
+            const status = document.getElementById('rel_cert_status').value;
+            let filtrados = todosCertificados;
+            if (status !== 'TODOS') {
+                filtrados = todosCertificados.filter(c => {
+                    if (status === 'VENCIDO') return c.status_cor === 'vermelho';
+                    if (status === 'ATENCAO') return c.status_cor === 'amarelo';
+                    if (status === 'EM DIA') return c.status_cor === 'verde';
+                });
+            }
+            document.getElementById('relatorioTitulo').textContent = 'Relatório de Certificados';
+            
+            let html = `<div class="text-xs text-slate-400 mb-2 font-bold">Status Filtrado: ${status} | Registros: ${filtrados.length}</div>
+                <table class="w-full text-left border-collapse border border-slate-300 dark:border-darkborder text-xs">
+                    <thead><tr class="bg-slate-100 dark:bg-zinc-900 border-b border-slate-300 dark:border-darkborder"><th class="p-2 border border-slate-300 dark:border-darkborder">Cliente</th><th class="p-2 border border-slate-300 dark:border-darkborder">Contato</th><th class="p-2 border border-slate-300 dark:border-darkborder">Vencimento</th><th class="p-2 border border-slate-300 dark:border-darkborder">Dias Restantes</th></tr></thead><tbody>`;
+            
+            filtrados.forEach(c => {
+                let statusText = c.status_cor === 'vermelho' ? 'VENCIDO' : (c.status_cor === 'amarelo' ? 'ATENÇÃO' : 'EM DIA');
+                html += `<tr class="border-b border-slate-200 dark:border-zinc-900"><td class="p-2 border border-slate-300 dark:border-darkborder font-bold">${c.empresa}</td><td class="p-2 border border-slate-300 dark:border-darkborder">${c.contato || '-'} (${c.telefone || '-'})</td><td class="p-2 border border-slate-300 dark:border-darkborder font-bold">${c.vencimento_fmt}</td><td class="p-2 border border-slate-300 dark:border-darkborder font-bold">${statusText} (${c.dias} dias)</td></tr>`;
+            });
+            html += `</tbody></table>`;
+            
             document.getElementById('relatorioConteudo').innerHTML = html;
             document.getElementById('areaRelatorioGerado').classList.remove('hidden');
             document.getElementById('areaRelatorioGerado').scrollIntoView({ behavior: 'smooth' });
