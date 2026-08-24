@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Painel NOTA SMART</title>
+    <!-- Ícone da aba do navegador -->
     <link rel="icon" href="/static/favicon.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,11 +13,29 @@
         }
     </script>
     <style>
+        /* Regras exclusivas para Impressão limpa */
         @media print {
-            body * { visibility: hidden; }
-            .print-active, .print-active * { visibility: visible; }
-            .print-active { position: absolute; left: 0; top: 0; width: 100%; margin: 0 !important; padding: 10px !important; background-color: white !important; color: black !important; border: none !important; box-shadow: none !important; }
-            .no-print { display: none !important; }
+            body * {
+                visibility: hidden;
+            }
+            .print-active, .print-active * {
+                visibility: visible;
+            }
+            .print-active {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0 !important;
+                padding: 10px !important;
+                background-color: white !important;
+                color: black !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
         }
         th.sortable { cursor: pointer; user-select: none; }
         th.sortable:hover { background-color: rgba(255,255,255,0.05); }
@@ -121,14 +140,10 @@
         <!-- ABA 2: FINANCEIRO -->
         <div id="content-financeiro" class="tab-content hidden space-y-6">
             <div class="flex justify-between items-center bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-slate-200 dark:border-darkborder">
-                <form method="GET" action="/dashboard" class="flex items-center space-x-3">
-                    <input type="hidden" name="tab" value="financeiro">
-                    <label class="text-sm font-semibold">Data Inicial:</label>
-                    <input type="date" name="data_inicio" value="{{ data_inicio }}" onchange="this.form.submit()" class="p-2 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 text-sm">
-                    
-                    <label class="text-sm font-semibold">Data Final:</label>
-                    <input type="date" name="data_fim" value="{{ data_fim }}" onchange="this.form.submit()" class="p-2 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 text-sm">
-                </form>
+                <div class="flex items-center space-x-3">
+                    <label class="text-sm font-semibold">Mês de Referência:</label>
+                    <select id="filtroMes" onchange="filtrarMesFinanceiro(this.value)" class="p-2 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 text-sm min-w-[200px]"></select>
+                </div>
                 <div class="space-x-2">
                     <button onclick="apagarSelecionados('financeiro')" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition">🗑️ Excluir Selecionados</button>
                     <button onclick="openModal('modalNovoLancamento')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition">+ Novo Lançamento</button>
@@ -151,7 +166,7 @@
             </div>
 
             <div class="bg-white dark:bg-darkcard rounded-xl shadow-sm border border-slate-200 dark:border-darkborder p-4">
-                <h3 class="font-bold text-lg mb-4">Extrato (Período: {{ data_inicio }} até {{ data_fim }})</h3>
+                <h3 class="font-bold text-lg mb-4">Extrato (Ref: {{ mes_atual }})</h3>
                 <table class="w-full text-left border-collapse text-sm" id="tabelaFinanceiro">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-zinc-900/50 text-xs text-slate-500 uppercase font-semibold">
@@ -177,8 +192,7 @@
                             </td>
                             <td class="py-2 px-3 font-semibold">{{ cob.nome_exibicao }}</td>
                             <td class="py-2 px-3 font-bold">R$ {{ "%.2f"|format(cob.valor|float) }}</td>
-                            <!-- Vencimento formatado no Padrão Brasil (DD/MM/AAAA) -->
-                            <td class="py-2 px-3 font-semibold">{{ cob.data_vencimento_fmt }}</td>
+                            <td class="py-2 px-3">{{ cob.data_vencimento or '-' }}</td>
                             <td class="py-2 px-3">
                                 {% if cob.status_fmt == 'PAGO' %}
                                     <span class="px-2 py-0.5 text-xs font-bold rounded bg-emerald-500/20 text-emerald-400 whitespace-nowrap">PAGO</span>
@@ -190,7 +204,7 @@
                             </td>
                             <td class="py-2 px-3 text-right space-x-2">
                                 {% if cob.status_fmt != 'PAGO' %}
-                                    <a href="/financeiro/pagar/{{ cob.id }}?tab=financeiro&data_inicio={{ data_inicio }}&data_fim={{ data_fim }}" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded font-semibold whitespace-nowrap">Marcar Pago</a>
+                                    <a href="/financeiro/pagar/{{ cob.id }}?tab=financeiro&mes={{ mes_atual }}" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded font-semibold whitespace-nowrap">Marcar Pago</a>
                                 {% endif %}
                                 <button onclick='openEditLancamentoModal({{ cob|tojson }})' class="text-blue-500 hover:underline font-semibold text-xs">Editar</button>
                             </td>
@@ -244,7 +258,7 @@
                     <div>
                         <div class="text-3xl mb-2">💰</div>
                         <h3 class="font-bold text-lg">Financeiro</h3>
-                        <p class="text-sm text-slate-400 mt-1">Filtre por período, tipo, status e cliente.</p>
+                        <p class="text-sm text-slate-400 mt-1">Filtre por mês, tipo, status e cliente.</p>
                     </div>
                     <button onclick="openModal('modalFiltroRelatorioFinanceiro')" class="mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded-lg text-sm">Emitir</button>
                 </div>
@@ -266,28 +280,30 @@
                         <img src="/static/logo.png" class="h-8 w-auto">
                         <h2 class="text-xl font-extrabold text-blue-600 dark:text-blue-400" id="relatorioTitulo">Relatório Emitido</h2>
                     </div>
+                    <!-- Ação de isolar este report para impressão -->
                     <button onclick="imprimirRelatorio('areaRelatorioGerado')" class="no-print bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir</button>
                 </div>
                 <div id="relatorioConteudo" class="text-sm space-y-4"></div>
             </div>
 
             <!-- RELATÓRIO FINANCEIRO VINDO DO BACKEND -->
-            {% if request.args.get('tab') == 'relatorios' and (data_inicio_rel or data_fim_rel or tipo_relatorio or status_relatorio or filtro_cliente) %}
+            {% if request.args.get('tab') == 'relatorios' and (mes_relatorio or tipo_relatorio or status_relatorio or filtro_cliente) %}
             <div id="relatorioFinanceiroGerado" class="bg-white dark:bg-darkcard text-slate-900 dark:text-slate-100 p-8 rounded-xl shadow-lg border border-slate-300 dark:border-darkborder space-y-6 mt-6">
                 <div class="flex justify-between items-center border-b border-slate-200 dark:border-darkborder pb-4">
                     <div class="flex items-center space-x-3">
                         <img src="/static/logo.png" class="h-8 w-auto">
                         <h2 class="text-xl font-extrabold text-blue-600 dark:text-blue-400">Relatório Financeiro</h2>
                     </div>
+                    <!-- Ação de isolar este report para impressão -->
                     <button onclick="imprimirRelatorio('relatorioFinanceiroGerado')" class="no-print bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir</button>
                 </div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 mb-2 font-semibold">
-                    Filtros -> Período: {{ data_inicio_rel or 'Todos' }} até {{ data_fim_rel or 'Todos' }} | Tipo: {{ tipo_relatorio or 'Todos' }} | Status: {{ status_relatorio or 'Todos' }} | Cliente: {{ filtro_cliente or 'Todos' }} | Registros: {{ cobrancas_relatorio|length }}
+                    Filtros -> Mês: {{ mes_relatorio or 'Todos' }} | Tipo: {{ tipo_relatorio or 'Todos' }} | Status: {{ status_relatorio or 'Todos' }} | Cliente: {{ filtro_cliente or 'Todos' }} | Registros: {{ cobrancas_relatorio|length }}
                 </div>
                 <table class="w-full text-left border-collapse border border-slate-300 dark:border-darkborder text-xs">
                     <thead>
                         <tr class="bg-slate-100 dark:bg-zinc-900 border-b border-slate-300 dark:border-darkborder">
-                            <th class="p-2 border border-slate-300 dark:border-darkborder">Período/Mês</th>
+                            <th class="p-2 border border-slate-300 dark:border-darkborder">Mês</th>
                             <th class="p-2 border border-slate-300 dark:border-darkborder">Tipo</th>
                             <th class="p-2 border border-slate-300 dark:border-darkborder">Cliente</th>
                             <th class="p-2 border border-slate-300 dark:border-darkborder">Valor</th>
@@ -302,7 +318,7 @@
                             <td class="p-2 border border-slate-300 dark:border-darkborder font-bold {{ 'text-emerald-500' if r.tipo_fmt == 'RECEITA' else 'text-red-500' }}">{{ r.tipo_fmt }}</td>
                             <td class="p-2 border border-slate-300 dark:border-darkborder font-semibold">{{ r.nome_exibicao }}</td>
                             <td class="p-2 border border-slate-300 dark:border-darkborder font-bold">R$ {{ "%.2f"|format(r.valor|float) }}</td>
-                            <td class="p-2 border border-slate-300 dark:border-darkborder font-semibold">{{ r.data_vencimento_fmt }}</td>
+                            <td class="p-2 border border-slate-300 dark:border-darkborder">{{ r.data_vencimento or '-' }}</td>
                             <td class="p-2 border border-slate-300 dark:border-darkborder font-bold">{{ r.status_fmt }}</td>
                         </tr>
                         {% endfor %}
@@ -435,28 +451,24 @@
         </div>
     </div>
 
-    <!-- MODAL RELATÓRIO FINANCEIRO -->
+    <!-- MODAL RELATÓRIO FINANCEIRO (Ajustado Ordem e Campos) -->
     <div id="modalFiltroRelatorioFinanceiro" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-darkcard p-6 rounded-xl w-full max-w-md space-y-4 shadow-2xl">
             <h3 class="font-bold text-lg">Filtro Financeiro</h3>
             <form method="GET" action="/dashboard" class="space-y-3 text-sm">
                 <input type="hidden" name="tab" value="relatorios">
                 
-                <div>
-                    <label class="text-xs text-slate-400 font-semibold">Data Inicial</label>
-                    <input type="date" name="data_inicio_rel" value="{{ data_inicio_rel or data_inicio }}" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-slate-100">
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400 font-semibold">Data Final</label>
-                    <input type="date" name="data_fim_rel" value="{{ data_fim_rel or data_fim }}" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-slate-100">
-                </div>
+                <!-- 1. Mês de Referência (Select Gerado via JS) -->
+                <select id="select_mes_relatorio" name="mes_relatorio" class="w-full p-2 rounded border bg-slate-100 dark:bg-zinc-900 font-semibold"></select>
 
+                <!-- 2. Tipo -->
                 <select name="tipo_relatorio" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">
                     <option value="">-- Todos os Tipos (Receita/Despesa) --</option>
                     <option value="RECEITA" {% if tipo_relatorio == 'RECEITA' %}selected{% endif %}>🟢 Receitas (A Receber)</option>
                     <option value="DESPESA" {% if tipo_relatorio == 'DESPESA' %}selected{% endif %}>🔴 Despesas (A Pagar)</option>
                 </select>
 
+                <!-- 3. Status -->
                 <select name="status_relatorio" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">
                     <option value="">-- Todos os Status (Pagos/A Vencer) --</option>
                     <option value="A VENCER" {% if status_relatorio == 'A VENCER' %}selected{% endif %}>A Vencer</option>
@@ -464,6 +476,7 @@
                     <option value="VENCIDO" {% if status_relatorio == 'VENCIDO' %}selected{% endif %}>Vencido</option>
                 </select>
 
+                <!-- 4. Cliente (Input de Texto) -->
                 <input type="text" name="filtro_cliente" value="{{ filtro_cliente }}" placeholder="🔎 Digite parte do nome do Cliente" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-slate-100">
 
                 <div class="flex justify-end space-x-2 pt-2">
@@ -533,7 +546,7 @@
         <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-lg w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
             <h3 class="text-lg font-bold">Novo Lançamento Financeiro</h3>
             <form action="/financeiro/novo" method="POST" class="grid grid-cols-2 gap-3 text-sm">
-                <input type="hidden" name="tab" value="financeiro">
+                <input type="hidden" name="tab" value="financeiro"><input type="hidden" name="mes" id="input_mes_novo_lanc">
                 <select name="tipo" class="col-span-2 w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900"><option value="RECEITA" class="text-emerald-500 font-bold">🟢 RECEITA (Receber)</option><option value="DESPESA" class="text-red-500 font-bold">🔴 DESPESA (Pagar)</option></select>
                 <select name="cliente_nome" required class="col-span-2 w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900"><option value="">-- Cliente --</option>{% for c in clientes %}<option value="{{ c.empresa }}">{{ c.empresa }}</option>{% endfor %}</select>
                 <input type="number" step="0.01" name="valor" placeholder="Valor (R$)" required class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
@@ -553,7 +566,7 @@
         <div class="bg-white dark:bg-darkcard p-6 rounded-xl max-w-lg w-full space-y-4 shadow-2xl border border-slate-200 dark:border-darkborder">
             <h3 class="text-lg font-bold">Editar Lançamento</h3>
             <form action="/financeiro/editar" method="POST" class="grid grid-cols-2 gap-3 text-sm">
-                <input type="hidden" name="tab" value="financeiro"><input type="hidden" id="edit_lanc_id" name="id">
+                <input type="hidden" name="tab" value="financeiro"><input type="hidden" name="mes" id="input_mes_edit_lanc"><input type="hidden" id="edit_lanc_id" name="id">
                 <select id="edit_lanc_tipo" name="tipo" class="col-span-2 w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900"><option value="RECEITA">🟢 RECEITA</option><option value="DESPESA">🔴 DESPESA</option></select>
                 <select id="edit_lanc_cliente" name="cliente_nome" required class="col-span-2 w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">{% for c in clientes %}<option value="{{ c.empresa }}">{{ c.empresa }}</option>{% endfor %}</select>
                 <input type="number" step="0.01" id="edit_lanc_valor" name="valor" required class="p-2 rounded border bg-slate-100 dark:bg-zinc-900">
@@ -570,20 +583,70 @@
         const todasCobrancas = {{ todas_cobrancas|tojson }};
         const tabAtivaServidor = "{{ tab }}";
 
+        // GERA LISTA DE MESES (Selects)
+        function renderMonthOptions(selectElementId, selectedValue) {
+            const select = document.getElementById(selectElementId);
+            if (!select) return;
+            select.innerHTML = '';
+            
+            const options = [{val: 'Todos', label: 'Todos os Lançamentos'}];
+            const startYear = 2024;
+            const endYear = 2028;
+
+            // Primeiro adiciona os Anos Completos
+            for(let ano = startYear; ano <= endYear; ano++) {
+                options.push({val: ano.toString(), label: `Ano Inteiro - ${ano}`});
+            }
+
+            // Depois adiciona Mês a Mês
+            const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            for(let ano = startYear; ano <= endYear; ano++) {
+                for(let m = 1; m <= 12; m++) {
+                    let mStr = m.toString().padStart(2, '0');
+                    options.push({val: `${ano}-${mStr}`, label: `${meses[m-1]} / ${ano}`});
+                }
+            }
+            
+            options.forEach(opt => {
+                let optionNode = document.createElement('option');
+                optionNode.value = opt.val;
+                optionNode.textContent = opt.label;
+                if(opt.val === selectedValue) {
+                    optionNode.selected = true;
+                }
+                select.appendChild(optionNode);
+            });
+        }
+
         window.addEventListener('load', () => {
             const scrollPos = sessionStorage.getItem('scrollPosition');
             if (scrollPos) { window.scrollTo(0, parseInt(scrollPos)); sessionStorage.removeItem('scrollPosition'); }
             
             switchTab(tabAtivaServidor || 'clientes');
+
+            // Renderiza as opções nos dois menus de meses
+            renderMonthOptions('filtroMes', '{{ mes_atual }}');
+            renderMonthOptions('select_mes_relatorio', '{{ mes_relatorio or "Todos" }}');
+            
+            const mesInput = document.getElementById('filtroMes');
+            if (mesInput && mesInput.value) {
+                if(document.getElementById('input_mes_novo_lanc')) document.getElementById('input_mes_novo_lanc').value = mesInput.value;
+                if(document.getElementById('input_mes_edit_lanc')) document.getElementById('input_mes_edit_lanc').value = mesInput.value;
+            }
         });
 
         window.addEventListener('beforeunload', () => {
             sessionStorage.setItem('scrollPosition', window.scrollY);
         });
 
+        // IMPRESSÃO ISOLADA
         function imprimirRelatorio(idContainer) {
+            // Remove a classe print-active de tudo que possa ter
             document.querySelectorAll('.print-active').forEach(el => el.classList.remove('print-active'));
+            // Adiciona print-active SOMENTE na div que queremos imprimir
             document.getElementById(idContainer).classList.add('print-active');
+            
+            // Abre caixa de impressão
             window.print();
         }
 
@@ -663,6 +726,8 @@
             document.getElementById('cert_vencimento').value = vencimento || '';
             openModal('modalCertificado');
         }
+
+        function filtrarMesFinanceiro(mes) { window.location.href = '/dashboard?tab=financeiro&mes=' + mes; }
 
         function gerarRelatorioClientes() {
             closeModal('modalFiltroRelatorioClientes');
