@@ -8,9 +8,17 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "chave_secreta_padrao_nota_smart")
 
-# Configuração do Banco de Dados SQLite (Persistente no ambiente local, porém efêmero no Render Free)
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "database.db")
+# ==========================================
+# CONFIGURAÇÃO DO BANCO DE DADOS (SUPABASE)
+# ==========================================
+DEFAULT_SUPABASE_URI = "postgresql://postgres.bmnvxtcdmtuklmpxelwa:Spike%4077991340@aws-0-sa-east-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL = os.environ.get("DATABASE_URL", DEFAULT_SUPABASE_URI)
+
+# Correção de compatibilidade para URIs do PostgreSQL
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -49,7 +57,7 @@ class CobrancaModel(db.Model):
     status_fmt = db.Column(db.String(20), default="A VENCER")  # PAGO, A VENCER, VENCIDO
     mes = db.Column(db.String(20), nullable=True)
 
-# Cria as tabelas e garante um usuário padrão ao iniciar o app
+# Cria as tabelas e garante um usuário padrão apenas se ainda não existir
 with app.app_context():
     db.create_all()
     if not UsuarioModel.query.filter_by(email="admin@admin.com").first():
@@ -91,7 +99,6 @@ def login():
             session["usuario_id"] = usuario.id
             return redirect(url_for("dashboard"))
 
-        # Correção: O HTML do login espera as mensagens através da função 'flash'
         flash("E-mail ou senha incorretos.", "error")
         return redirect(url_for("login"))
 
