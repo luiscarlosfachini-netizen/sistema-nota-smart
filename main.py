@@ -3,14 +3,13 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import datetime
 import calendar
 
-# Se os seus modelos estiverem em outro arquivo (ex: models.py), 
-# substitua por: from models import db, UsuarioModel, ClienteModel, CobrancaModel
-# Caso contrário, certifique-se de que a instância do db e dos modelos estejam definidos no projeto.
+# IMPORTANTE: Altere 'models' para o nome do arquivo onde suas classes foram criadas
+# (Exemplo: se o arquivo for 'banco.py', use: from banco import db, UsuarioModel, ClienteModel, CobrancaModel)
+from models import db, UsuarioModel, ClienteModel, CobrancaModel
 
 app = Flask(__name__)
 app.secret_key = "minha_chave_secreta_super_segura_aqui"
 
-# Decorator para controle de acesso às rotas protegidas
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -34,10 +33,8 @@ def login():
         email = request.form.get("email")
         senha = request.form.get("senha")
 
-        # Busca o usuário no banco de dados
         usuario = UsuarioModel.query.filter_by(email=email).first()
 
-        # Valida credenciais (caso use hash de senha, troque usuario.senha == senha por check_password_hash)
         if usuario and usuario.senha == senha:
             session["usuario_id"] = usuario.id
             return redirect(url_for("dashboard"))
@@ -67,12 +64,10 @@ def dashboard():
     usuarios_db = UsuarioModel.query.all()
     clientes_db = ClienteModel.query.order_by(ClienteModel.empresa.asc()).all()
     
-    # 1. ORDENAÇÃO POR DATA DE VENCIMENTO
     cobrancas_db = CobrancaModel.query.order_by(CobrancaModel.data_vencimento.asc()).all()
 
     tab = request.args.get("tab", "clientes")
     
-    # 2. DEFINIÇÃO DO PERÍODO PADRÃO (MÊS ATUAL: PRIMEIRO E ÚLTIMO DIA)
     hoje = datetime.now()
     primeiro_dia_mes = hoje.replace(day=1).strftime("%Y-%m-%d")
     ultimo_dia_mes = hoje.replace(day=calendar.monthrange(hoje.year, hoje.month)[1]).strftime("%Y-%m-%d")
@@ -80,20 +75,17 @@ def dashboard():
     data_inicio = request.args.get("data_inicio", primeiro_dia_mes)
     data_fim = request.args.get("data_fim", ultimo_dia_mes)
 
-    # Filtros do Relatório Financeiro
     data_inicio_rel = request.args.get("data_inicio_rel", "")
     data_fim_rel = request.args.get("data_fim_rel", "")
     tipo_relatorio = request.args.get("tipo_relatorio", "")
     status_relatorio = request.args.get("status_relatorio", "")
     filtro_cliente = request.args.get("filtro_cliente", "")
 
-    # Lógica do Período na Aba Financeiro (Extrato)
     cobrancas_mes = [
         c for c in cobrancas_db 
         if c.data_vencimento and data_inicio <= c.data_vencimento <= data_fim
     ]
 
-    # Lógica do Relatório Financeiro (Aba Relatórios)
     cobrancas_relatorio = cobrancas_db
     if data_inicio_rel and data_fim_rel:
         cobrancas_relatorio = [
@@ -182,7 +174,6 @@ def dashboard():
             "modulos": c.modulos, "vencimento_cert": v_raw,
         })
 
-    # Função Auxiliar para Formatar Data no Padrão BR (DD/MM/AAAA)
     def formatar_data_br(dt_str):
         if not dt_str:
             return "-"
