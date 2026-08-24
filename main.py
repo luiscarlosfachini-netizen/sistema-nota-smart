@@ -1,3 +1,13 @@
+from flask import Flask, render_template, request, redirect, url_for, session
+from datetime import datetime
+import calendar
+
+# 1. INICIALIZAÇÃO OBRIGATÓRIA DO FLASK
+app = Flask(__name__)
+
+# Chave secreta necessária para gerenciar a 'session' de login
+app.secret_key = "minha_chave_secreta_super_segura_aqui"
+
 # ==========================================
 # ROTA PRINCIPAL: DASHBOARD
 # ==========================================
@@ -180,3 +190,6 @@ def dashboard():
         data_inicio_rel=data_inicio_rel, data_fim_rel=data_fim_rel,
         filtro_cliente=filtro_cliente, tipo_relatorio=tipo_relatorio, status_relatorio=status_relatorio
     )
+
+if __name__ == "__main__":
+    app.run()
