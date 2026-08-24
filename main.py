@@ -155,17 +155,32 @@ def dashboard():
     status_relatorio = request.args.get("status_relatorio", "")
     filtro_cliente = request.args.get("filtro_cliente", "")
 
-    cobrancas_mes = [c for c in cobrancas_db if c.mes == mes_atual]
+    # Lógica do Mês Atual (Aba Extrato) considerando "Todos" ou Anos Completos
+    cobrancas_mes = []
+    if mes_atual == "Todos":
+        cobrancas_mes = cobrancas_db
+    elif len(mes_atual) == 4:  # Ano completo (Ex: 2025, 2026)
+        cobrancas_mes = [c for c in cobrancas_db if c.mes and c.mes.startswith(mes_atual)]
+    else:
+        cobrancas_mes = [c for c in cobrancas_db if c.mes == mes_atual]
 
+    # Lógica do Relatório Financeiro (Aba Relatórios)
     cobrancas_relatorio = cobrancas_db
-    if mes_relatorio:
-        cobrancas_relatorio = [c for c in cobrancas_relatorio if c.mes == mes_relatorio]
+    if mes_relatorio and mes_relatorio != "Todos":
+        if len(mes_relatorio) == 4:
+            cobrancas_relatorio = [c for c in cobrancas_relatorio if c.mes and c.mes.startswith(mes_relatorio)]
+        else:
+            cobrancas_relatorio = [c for c in cobrancas_relatorio if c.mes == mes_relatorio]
+            
     if tipo_relatorio:
         cobrancas_relatorio = [c for c in cobrancas_relatorio if c.tipo_fmt == tipo_relatorio]
+        
     if status_relatorio:
         cobrancas_relatorio = [c for c in cobrancas_relatorio if c.status_fmt == status_relatorio]
+        
     if filtro_cliente:
-        cobrancas_relatorio = [c for c in cobrancas_relatorio if c.nome_exibicao == filtro_cliente]
+        # Busca por digitação de parte do nome
+        cobrancas_relatorio = [c for c in cobrancas_relatorio if filtro_cliente.lower() in (c.nome_exibicao or "").lower()]
 
     total_receita = sum(float(c.valor) for c in cobrancas_mes if c.tipo_fmt == "RECEITA" and c.status_fmt == "PAGO")
     total_custo = sum(float(c.valor) for c in cobrancas_mes if c.tipo_fmt == "DESPESA" and c.status_fmt == "PAGO")

@@ -11,11 +11,29 @@
         }
     </script>
     <style>
+        /* Regras exclusivas para Impressão limpa */
         @media print {
-            nav, .no-print, button, input, select { display: none !important; }
-            .tab-content { display: block !important; }
-            body { background: #0a0a0a !important; color: white !important; }
-            .print-area { display: block !important; }
+            body * {
+                visibility: hidden;
+            }
+            .print-active, .print-active * {
+                visibility: visible;
+            }
+            .print-active {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0 !important;
+                padding: 10px !important;
+                background-color: white !important;
+                color: black !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
         }
         th.sortable { cursor: pointer; user-select: none; }
         th.sortable:hover { background-color: rgba(255,255,255,0.05); }
@@ -26,7 +44,7 @@
     <nav class="bg-white dark:bg-darkcard border-b border-slate-200 dark:border-darkborder px-6 py-3 flex justify-between items-center shadow-sm">
         <div class="flex items-center space-x-3 w-1/4">
             <img src="/static/logo.png" alt="Logo NOTA SMART" class="h-10 w-auto object-contain">
-            <span class="text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2.5 py-0.5 rounded-full font-bold">v4.2</span>
+            <span class="text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2.5 py-0.5 rounded-full font-bold">v4.3</span>
         </div>
 
         <div class="flex-1 flex justify-center items-center space-x-8 no-print">
@@ -122,7 +140,7 @@
             <div class="flex justify-between items-center bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-slate-200 dark:border-darkborder">
                 <div class="flex items-center space-x-3">
                     <label class="text-sm font-semibold">Mês de Referência:</label>
-                    <input type="month" id="filtroMes" value="{{ mes_atual }}" onchange="filtrarMesFinanceiro(this.value)" class="p-2 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 text-sm">
+                    <select id="filtroMes" onchange="filtrarMesFinanceiro(this.value)" class="p-2 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 text-sm min-w-[200px]"></select>
                 </div>
                 <div class="space-x-2">
                     <button onclick="apagarSelecionados('financeiro')" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition">🗑️ Excluir Selecionados</button>
@@ -146,7 +164,7 @@
             </div>
 
             <div class="bg-white dark:bg-darkcard rounded-xl shadow-sm border border-slate-200 dark:border-darkborder p-4">
-                <h3 class="font-bold text-lg mb-4">Extrato (Mês {{ mes_atual }})</h3>
+                <h3 class="font-bold text-lg mb-4">Extrato (Ref: {{ mes_atual }})</h3>
                 <table class="w-full text-left border-collapse text-sm" id="tabelaFinanceiro">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-zinc-900/50 text-xs text-slate-500 uppercase font-semibold">
@@ -260,20 +278,22 @@
                         <img src="/static/logo.png" class="h-8 w-auto">
                         <h2 class="text-xl font-extrabold text-blue-600 dark:text-blue-400" id="relatorioTitulo">Relatório Emitido</h2>
                     </div>
-                    <button onclick="window.print()" class="no-print bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir</button>
+                    <!-- Ação de isolar este report para impressão -->
+                    <button onclick="imprimirRelatorio('areaRelatorioGerado')" class="no-print bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir</button>
                 </div>
                 <div id="relatorioConteudo" class="text-sm space-y-4"></div>
             </div>
 
-            <!-- RELATÓRIO FINANCEIRO VINDO DO BACKEND (DARK/LIGHT ADAPTADO) -->
-            {% if mes_relatorio or tipo_relatorio or status_relatorio or filtro_cliente %}
-            <div class="bg-white dark:bg-darkcard text-slate-900 dark:text-slate-100 p-8 rounded-xl shadow-lg border border-slate-300 dark:border-darkborder space-y-6 mt-6">
+            <!-- RELATÓRIO FINANCEIRO VINDO DO BACKEND -->
+            {% if request.args.get('tab') == 'relatorios' and (mes_relatorio or tipo_relatorio or status_relatorio or filtro_cliente) %}
+            <div id="relatorioFinanceiroGerado" class="bg-white dark:bg-darkcard text-slate-900 dark:text-slate-100 p-8 rounded-xl shadow-lg border border-slate-300 dark:border-darkborder space-y-6 mt-6">
                 <div class="flex justify-between items-center border-b border-slate-200 dark:border-darkborder pb-4">
                     <div class="flex items-center space-x-3">
                         <img src="/static/logo.png" class="h-8 w-auto">
                         <h2 class="text-xl font-extrabold text-blue-600 dark:text-blue-400">Relatório Financeiro</h2>
                     </div>
-                    <button onclick="window.print()" class="no-print bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir</button>
+                    <!-- Ação de isolar este report para impressão -->
+                    <button onclick="imprimirRelatorio('relatorioFinanceiroGerado')" class="no-print bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-xs">🖨️ Imprimir</button>
                 </div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 mb-2 font-semibold">
                     Filtros -> Mês: {{ mes_relatorio or 'Todos' }} | Tipo: {{ tipo_relatorio or 'Todos' }} | Status: {{ status_relatorio or 'Todos' }} | Cliente: {{ filtro_cliente or 'Todos' }} | Registros: {{ cobrancas_relatorio|length }}
@@ -429,27 +449,34 @@
         </div>
     </div>
 
+    <!-- MODAL RELATÓRIO FINANCEIRO (Ajustado Ordem e Campos) -->
     <div id="modalFiltroRelatorioFinanceiro" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-darkcard p-6 rounded-xl w-full max-w-md space-y-4 shadow-2xl">
             <h3 class="font-bold text-lg">Filtro Financeiro</h3>
             <form method="GET" action="/dashboard" class="space-y-3 text-sm">
                 <input type="hidden" name="tab" value="relatorios">
-                <input type="month" name="mes_relatorio" value="{{ mes_relatorio }}" class="w-full p-2 rounded border bg-slate-100 dark:bg-zinc-900">
+                
+                <!-- 1. Mês de Referência (Select Gerado via JS) -->
+                <select id="select_mes_relatorio" name="mes_relatorio" class="w-full p-2 rounded border bg-slate-100 dark:bg-zinc-900 font-semibold"></select>
+
+                <!-- 2. Tipo -->
                 <select name="tipo_relatorio" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">
-                    <option value="">-- Todos os Tipos --</option>
+                    <option value="">-- Todos os Tipos (Receita/Despesa) --</option>
                     <option value="RECEITA" {% if tipo_relatorio == 'RECEITA' %}selected{% endif %}>🟢 Receitas (A Receber)</option>
                     <option value="DESPESA" {% if tipo_relatorio == 'DESPESA' %}selected{% endif %}>🔴 Despesas (A Pagar)</option>
                 </select>
+
+                <!-- 3. Status -->
                 <select name="status_relatorio" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">
-                    <option value="">-- Todos os Status --</option>
+                    <option value="">-- Todos os Status (Pagos/A Vencer) --</option>
                     <option value="A VENCER" {% if status_relatorio == 'A VENCER' %}selected{% endif %}>A Vencer</option>
                     <option value="PAGO" {% if status_relatorio == 'PAGO' %}selected{% endif %}>Pago</option>
                     <option value="VENCIDO" {% if status_relatorio == 'VENCIDO' %}selected{% endif %}>Vencido</option>
                 </select>
-                <select name="filtro_cliente" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900">
-                    <option value="">-- Todos os Clientes --</option>
-                    {% for c in clientes %}<option value="{{ c.empresa }}" {% if filtro_cliente == c.empresa %}selected{% endif %}>{{ c.empresa }}</option>{% endfor %}
-                </select>
+
+                <!-- 4. Cliente (Input de Texto) -->
+                <input type="text" name="filtro_cliente" value="{{ filtro_cliente }}" placeholder="🔎 Digite parte do nome do Cliente" class="w-full p-2 rounded border font-semibold bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-slate-100">
+
                 <div class="flex justify-end space-x-2 pt-2">
                     <button type="button" onclick="closeModal('modalFiltroRelatorioFinanceiro')" class="px-4 py-2 rounded bg-slate-200 dark:bg-zinc-800 font-semibold">Cancelar</button>
                     <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white font-semibold">Emitir</button>
@@ -554,11 +581,51 @@
         const todasCobrancas = {{ todas_cobrancas|tojson }};
         const tabAtivaServidor = "{{ tab }}";
 
+        // GERA LISTA DE MESES (Selects)
+        function renderMonthOptions(selectElementId, selectedValue) {
+            const select = document.getElementById(selectElementId);
+            if (!select) return;
+            select.innerHTML = '';
+            
+            const options = [{val: 'Todos', label: 'Todos os Lançamentos'}];
+            const startYear = 2024;
+            const endYear = 2028;
+
+            // Primeiro adiciona os Anos Completos
+            for(let ano = startYear; ano <= endYear; ano++) {
+                options.push({val: ano.toString(), label: `Ano Inteiro - ${ano}`});
+            }
+
+            // Depois adiciona Mês a Mês
+            const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            for(let ano = startYear; ano <= endYear; ano++) {
+                for(let m = 1; m <= 12; m++) {
+                    let mStr = m.toString().padStart(2, '0');
+                    options.push({val: `${ano}-${mStr}`, label: `${meses[m-1]} / ${ano}`});
+                }
+            }
+            
+            options.forEach(opt => {
+                let optionNode = document.createElement('option');
+                optionNode.value = opt.val;
+                optionNode.textContent = opt.label;
+                if(opt.val === selectedValue) {
+                    optionNode.selected = true;
+                }
+                select.appendChild(optionNode);
+            });
+        }
+
         window.addEventListener('load', () => {
             const scrollPos = sessionStorage.getItem('scrollPosition');
             if (scrollPos) { window.scrollTo(0, parseInt(scrollPos)); sessionStorage.removeItem('scrollPosition'); }
             
             switchTab(tabAtivaServidor || 'clientes');
+
+            // Renderiza as opções nos dois menus de meses
+            renderMonthOptions('filtroMes', '{{ mes_atual }}');
+            renderMonthOptions('select_mes_relatorio', '{{ mes_relatorio or "Todos" }}');
+            
             const mesInput = document.getElementById('filtroMes');
             if (mesInput && mesInput.value) {
                 if(document.getElementById('input_mes_novo_lanc')) document.getElementById('input_mes_novo_lanc').value = mesInput.value;
@@ -569,6 +636,17 @@
         window.addEventListener('beforeunload', () => {
             sessionStorage.setItem('scrollPosition', window.scrollY);
         });
+
+        // IMPRESSÃO ISOLADA
+        function imprimirRelatorio(idContainer) {
+            // Remove a classe print-active de tudo que possa ter
+            document.querySelectorAll('.print-active').forEach(el => el.classList.remove('print-active'));
+            // Adiciona print-active SOMENTE na div que queremos imprimir
+            document.getElementById(idContainer).classList.add('print-active');
+            
+            // Abre caixa de impressão
+            window.print();
+        }
 
         function toggleAll(source, name) {
             const checkboxes = document.getElementsByName(name);
@@ -655,7 +733,7 @@
             let filtrados = status !== 'TODOS' ? todosClientes.filter(c => c.status_fmt === status) : todosClientes;
             document.getElementById('relatorioTitulo').textContent = 'Relatório Geral de Clientes';
             
-            let html = `<div class="text-xs text-slate-400 mb-2">Status: ${status} | Registros: ${filtrados.length}</div>
+            let html = `<div class="text-xs text-slate-400 mb-2 font-semibold">Status Filtrado: ${status} | Registros: ${filtrados.length}</div>
                 <table class="w-full text-left border-collapse border border-slate-300 dark:border-darkborder text-xs">
                     <thead><tr class="bg-slate-100 dark:bg-zinc-900 border-b border-slate-300 dark:border-darkborder"><th class="p-2 border border-slate-300 dark:border-darkborder">Status</th><th class="p-2 border border-slate-300 dark:border-darkborder">Empresa</th><th class="p-2 border border-slate-300 dark:border-darkborder">CNPJ</th><th class="p-2 border border-slate-300 dark:border-darkborder">Contato</th></tr></thead><tbody>`;
             filtrados.forEach(c => html += `<tr class="border-b border-slate-200 dark:border-zinc-900"><td class="p-2 border border-slate-300 dark:border-darkborder font-bold">${c.status_fmt}</td><td class="p-2 border border-slate-300 dark:border-darkborder font-bold">${c.empresa}</td><td class="p-2 border border-slate-300 dark:border-darkborder">${c.cnpj || '-'}</td><td class="p-2 border border-slate-300 dark:border-darkborder">${c.contato || '-'} (${c.telefone || '-'})</td></tr>`);
@@ -679,7 +757,7 @@
             }
             document.getElementById('relatorioTitulo').textContent = 'Relatório de Certificados';
             
-            let html = `<div class="text-xs text-slate-400 mb-2 font-bold">Status Filtrado: ${status} | Registros: ${filtrados.length}</div>
+            let html = `<div class="text-xs text-slate-400 mb-2 font-semibold">Status Filtrado: ${status} | Registros: ${filtrados.length}</div>
                 <table class="w-full text-left border-collapse border border-slate-300 dark:border-darkborder text-xs">
                     <thead><tr class="bg-slate-100 dark:bg-zinc-900 border-b border-slate-300 dark:border-darkborder"><th class="p-2 border border-slate-300 dark:border-darkborder">Cliente</th><th class="p-2 border border-slate-300 dark:border-darkborder">Contato</th><th class="p-2 border border-slate-300 dark:border-darkborder">Vencimento</th><th class="p-2 border border-slate-300 dark:border-darkborder">Dias Restantes</th></tr></thead><tbody>`;
             
