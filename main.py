@@ -11,7 +11,7 @@ app.secret_key = "sua_chave_secreta_aqui"
 
 # Configuração do Banco de Dados PostgreSQL no Supabase com o search_path explícito
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "postgresql://postgres:Spike%4077991340@db.bmnvxtcdmtuklmpxelwa.supabase.co:5432/postgres?options=-c%20search_path=public"
+    "postgresql://postgres.bmnvxtcdmtuklmpxelwa:Spike%4077991340@aws-0-sa-east-1.pooler.supabase.com:6543/postgres"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
