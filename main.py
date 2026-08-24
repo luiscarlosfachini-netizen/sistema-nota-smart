@@ -3,10 +3,11 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import datetime
 import calendar
 
-# 1. INICIALIZAÇÃO OBRIGATÓRIA DO FLASK
-app = Flask(__name__)
+# Se os seus modelos estiverem em outro arquivo (ex: models.py), 
+# substitua por: from models import db, UsuarioModel, ClienteModel, CobrancaModel
+# Caso contrário, certifique-se de que a instância do db e dos modelos estejam definidos no projeto.
 
-# Chave secreta para gerenciar sessões
+app = Flask(__name__)
 app.secret_key = "minha_chave_secreta_super_segura_aqui"
 
 # Decorator para controle de acesso às rotas protegidas
@@ -30,9 +31,19 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        # Insira aqui a validação de usuário e senha do seu banco de dados
-        # Exemplo: session["usuario_id"] = usuario.id
-        pass
+        email = request.form.get("email")
+        senha = request.form.get("senha")
+
+        # Busca o usuário no banco de dados
+        usuario = UsuarioModel.query.filter_by(email=email).first()
+
+        # Valida credenciais (caso use hash de senha, troque usuario.senha == senha por check_password_hash)
+        if usuario and usuario.senha == senha:
+            session["usuario_id"] = usuario.id
+            return redirect(url_for("dashboard"))
+
+        return render_template("login.html", erro="E-mail ou senha incorretos.")
+
     return render_template("login.html")
 
 @app.route("/logout")
