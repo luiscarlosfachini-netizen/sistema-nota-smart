@@ -1,15 +1,70 @@
+import os
+import calendar
+from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session
-from datetime import datetime
-import calendar
-
-# IMPORTANTE: Altere 'models' para o nome do arquivo onde suas classes foram criadas
-# (Exemplo: se o arquivo for 'banco.py', use: from banco import db, UsuarioModel, ClienteModel, CobrancaModel)
-from models import db, UsuarioModel, ClienteModel, CobrancaModel
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.secret_key = "minha_chave_secreta_super_segura_aqui"
+app.secret_key = os.environ.get("SECRET_KEY", "chave_secreta_padrao_nota_smart")
 
+# Configuração do Banco de Dados SQLite (Persistente no ambiente local e no Render)
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "database.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+
+# ==========================================
+# MODELOS DO BANCO DE DADOS
+# ==========================================
+class UsuarioModel(db.Model):
+    __tablename__ = "usuarios"
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    senha = db.Column(db.String(100), nullable=False)
+    cargo = db.Column(db.String(50), default="Operador")
+    foto = db.Column(db.String(255), nullable=True)
+
+class ClienteModel(db.Model):
+    __tablename__ = "clientes"
+    id = db.Column(db.Integer, primary_key=True)
+    empresa = db.Column(db.String(100), nullable=False)
+    cnpj = db.Column(db.String(20), nullable=True)
+    contato = db.Column(db.String(100), nullable=True)
+    telefone = db.Column(db.String(30), nullable=True)
+    sistema = db.Column(db.String(50), nullable=True)
+    status_fmt = db.Column(db.String(20), default="ATIVO")
+    modulos = db.Column(db.String(200), nullable=True)
+    vencimento_cert = db.Column(db.String(20), nullable=True)
+
+class CobrancaModel(db.Model):
+    __tablename__ = "cobrancas"
+    id = db.Column(db.Integer, primary_key=True)
+    tipo_fmt = db.Column(db.String(20), nullable=False)  # RECEITA ou DESPESA
+    nome_exibicao = db.Column(db.String(100), nullable=False)
+    valor = db.Column(db.Float, nullable=False)
+    data_vencimento = db.Column(db.String(20), nullable=False)
+    status_fmt = db.Column(db.String(20), default="A VENCER")  # PAGO, A VENCER, VENCIDO
+    mes = db.Column(db.String(20), nullable=True)
+
+# Cria as tabelas e garante um usuário padrão ao iniciar o app
+with app.app_context():
+    db.create_all()
+    if not UsuarioModel.query.filter_by(email="admin@admin.com").first():
+        admin = UsuarioModel(
+            nome="Administrador",
+            email="admin@admin.com",
+            senha="admin",
+            cargo="Admin"
+        )
+        db.session.add(admin)
+        db.session.commit()
+
+# ==========================================
+# DECORATOR E ROTAS DE AUTENTICAÇÃO
+# ==========================================
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -18,9 +73,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# ==========================================
-# ROTAS DE AUTENTICAÇÃO E NAVEGAÇÃO
-# ==========================================
 @app.route("/")
 def index():
     if "usuario_id" in session:
@@ -63,7 +115,6 @@ def dashboard():
 
     usuarios_db = UsuarioModel.query.all()
     clientes_db = ClienteModel.query.order_by(ClienteModel.empresa.asc()).all()
-    
     cobrancas_db = CobrancaModel.query.order_by(CobrancaModel.data_vencimento.asc()).all()
 
     tab = request.args.get("tab", "clientes")
@@ -226,4 +277,4 @@ def dashboard():
     )
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

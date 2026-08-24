@@ -8,3 +8,6 @@ gunicorn==21.2.0
 setuptools
 wheel
 flask-login
+Flask
+Flask-SQLAlchemy
+gunicorn
