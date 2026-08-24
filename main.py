@@ -1,13 +1,44 @@
+from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session
-from flask_login import login_required
 from datetime import datetime
 import calendar
 
 # 1. INICIALIZAÇÃO OBRIGATÓRIA DO FLASK
 app = Flask(__name__)
 
-# Chave secreta necessária para gerenciar a 'session' de login
+# Chave secreta para gerenciar sessões
 app.secret_key = "minha_chave_secreta_super_segura_aqui"
+
+# Decorator para controle de acesso às rotas protegidas
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "usuario_id" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# ==========================================
+# ROTAS DE AUTENTICAÇÃO E NAVEGAÇÃO
+# ==========================================
+@app.route("/")
+def index():
+    if "usuario_id" in session:
+        return redirect(url_for("dashboard"))
+    return redirect(url_for("login"))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        # Insira aqui a validação de usuário e senha do seu banco de dados
+        # Exemplo: session["usuario_id"] = usuario.id
+        pass
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 # ==========================================
 # ROTA PRINCIPAL: DASHBOARD
@@ -109,7 +140,7 @@ def dashboard():
                     status_cor = "vermelho"
                 elif dias <= 15:
                     status_cor = "amarelo"
-            except Exception as e:
+            except Exception:
                 pass
 
         certificados.append({
